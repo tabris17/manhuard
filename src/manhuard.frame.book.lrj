@@ -1,0 +1,18 @@
+{"version":1,"strings":[
+{"hash":41538333,"name":"tframebook.labeltitle.caption","sourcebytes":[123,66,79,79,75,32,84,73,84,76,69,125],"value":"{BOOK TITLE}"},
+{"hash":208568989,"name":"tframebook.labelwriter.caption","sourcebytes":[123,87,82,73,84,69,82,125],"value":"{WRITER}"},
+{"hash":134550717,"name":"tframebook.labelplot.caption","sourcebytes":[123,80,76,79,84,125],"value":"{PLOT}"},
+{"hash":5941413,"name":"tframebook.labelstatetext.caption","sourcebytes":[83,116,97,116,101],"value":"State"},
+{"hash":8939597,"name":"tframebook.labelstate.caption","sourcebytes":[123,83,84,65,84,69,125],"value":"{STATE}"},
+{"hash":93053022,"name":"tframebook.labelregiontext.caption","sourcebytes":[82,101,103,105,111,110],"value":"Region"},
+{"hash":110881885,"name":"tframebook.labelregion.caption","sourcebytes":[123,82,69,71,73,79,78,125],"value":"{REGION}"},
+{"hash":392066,"name":"tframebook.labelyeartext.caption","sourcebytes":[89,101,97,114],"value":"Year"},
+{"hash":135108253,"name":"tframebook.labelyear.caption","sourcebytes":[123,89,69,65,82,125],"value":"{YEAR}"},
+{"hash":5096837,"name":"tframebook.labelgenretext.caption","sourcebytes":[71,101,110,114,101],"value":"Genre"},
+{"hash":263861949,"name":"tframebook.labelgenre.caption","sourcebytes":[123,71,69,78,82,69,125],"value":"{GENRE}"},
+{"hash":155331780,"name":"tframebook.labellastupdatedtext.caption","sourcebytes":[76,97,115,116,32,117,112,100,97,116,101,100],"value":"Last updated"},
+{"hash":82715933,"name":"tframebook.labellastupdated.caption","sourcebytes":[123,76,65,83,84,95,85,80,68,65,84,69,68,125],"value":"{LAST_UPDATED}"},
+{"hash":18253758,"name":"tframebook.labeloriginalruntext.caption","sourcebytes":[79,114,105,103,105,110,97,108,32,114,117,110],"value":"Original run"},
+{"hash":42586237,"name":"tframebook.labeloriginalrun.caption","sourcebytes":[123,79,82,73,71,73,78,65,76,95,82,85,78,125],"value":"{ORIGINAL_RUN}"},
+{"hash":357220,"name":"tframebook.labelplottext.caption","sourcebytes":[80,108,111,116],"value":"Plot"}
+]}

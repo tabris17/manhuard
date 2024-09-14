@@ -1,0 +1,21 @@
+{"version":1,"strings":[
+{"hash":180833861,"name":"tformmain.toolbuttonmainmenu.hint","sourcebytes":[79,112,101,110,32,109,97,105,110,32,109,101,110,117],"value":"Open main menu"},
+{"hash":4710148,"name":"tformmain.actionexit.caption","sourcebytes":[69,38,120,105,116],"value":"E&xit"},
+{"hash":325173,"name":"tformmain.actionhome.caption","sourcebytes":[72,111,109,101],"value":"Home"},
+{"hash":325173,"name":"tformmain.actionhome.hint","sourcebytes":[72,111,109,101],"value":"Home"},
+{"hash":103392070,"name":"tformmain.actionbookshelf.caption","sourcebytes":[66,111,111,107,115,104,101,108,102],"value":"Bookshelf"},
+{"hash":103392070,"name":"tformmain.actionbookshelf.hint","sourcebytes":[66,111,111,107,115,104,101,108,102],"value":"Bookshelf"},
+{"hash":52216343,"name":"tformmain.actiondownloading.caption","sourcebytes":[68,111,119,110,108,111,97,100,105,110,103],"value":"Downloading"},
+{"hash":52216343,"name":"tformmain.actiondownloading.hint","sourcebytes":[68,111,119,110,108,111,97,100,105,110,103],"value":"Downloading"},
+{"hash":108725763,"name":"tformmain.actionoptions.caption","sourcebytes":[79,112,116,105,111,110,115],"value":"Options"},
+{"hash":108725763,"name":"tformmain.actionoptions.hint","sourcebytes":[79,112,116,105,111,110,115],"value":"Options"},
+{"hash":94079128,"name":"tformmain.actionsearch.caption","sourcebytes":[83,101,97,114,99,104],"value":"Search"},
+{"hash":94079128,"name":"tformmain.actionsearch.hint","sourcebytes":[83,101,97,114,99,104],"value":"Search"},
+{"hash":107101211,"name":"tformmain.actionbookmark.caption","sourcebytes":[66,111,111,107,109,97,114,107],"value":"Bookmark"},
+{"hash":107101211,"name":"tformmain.actionbookmark.hint","sourcebytes":[66,111,111,107,109,97,114,107],"value":"Bookmark"},
+{"hash":108217201,"name":"tformmain.actionaddmanga.caption","sourcebytes":[65,100,100,32,109,97,110,103,97],"value":"Add manga"},
+{"hash":4691652,"name":"tformmain.actionabout.caption","sourcebytes":[65,98,111,117,116],"value":"About"},
+{"hash":2805797,"name":"tformmain.menuitem1.caption","sourcebytes":[38,70,105,108,101],"value":"&File"},
+{"hash":2812976,"name":"tformmain.menuitem2.caption","sourcebytes":[38,72,101,108,112],"value":"&Help"},
+{"hash":44537540,"name":"tformmain.menuitem4.caption","sourcebytes":[38,65,98,111,117,116],"value":"&About"}
+]}

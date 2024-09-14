@@ -1,0 +1,42 @@
+object FormBook: TFormBook
+  Left = 405
+  Height = 597
+  Top = 164
+  Width = 916
+  ClientHeight = 597
+  ClientWidth = 916
+  Color = clNone
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '3.4.0.0'
+  inline FrameBookInWindow: TFrameBook
+    Height = 597
+    Width = 916
+    Align = alClient
+    ClientHeight = 597
+    ClientWidth = 916
+    ParentBackground = False
+    inherited TableOfContents: TTreeView
+      Height = 575
+    end
+    inherited Splitter: TSplitter
+      Height = 575
+    end
+    inherited CoverBox: TScrollBox
+      Height = 575
+      Width = 654
+      HorzScrollBar.Page = 650
+      ClientHeight = 554
+      ClientWidth = 650
+      ParentBackground = False
+    end
+    inherited PageListView: TListView
+      Height = 575
+      Width = 654
+    end
+    inherited StatusBar: TStatusBar
+      Top = 575
+      Width = 916
+    end
+  end
+end

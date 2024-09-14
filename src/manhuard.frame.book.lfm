@@ -1,0 +1,476 @@
+object FrameBook: TFrameBook
+  Left = 0
+  Height = 647
+  Top = 0
+  Width = 953
+  ClientHeight = 647
+  ClientWidth = 953
+  OnResize = FrameResize
+  TabOrder = 0
+  DesignLeft = 416
+  DesignTop = 145
+  object TableOfContents: TTreeView
+    Left = 0
+    Height = 625
+    Top = 0
+    Width = 250
+    Align = alLeft
+    ExpandSignSize = 10
+    ExpandSignType = tvestArrow
+    HideSelection = False
+    HotTrack = True
+    Indent = 20
+    ReadOnly = True
+    RowSelect = True
+    ScrollBars = ssAutoBoth
+    ShowRoot = False
+    TabOrder = 0
+    OnSelectionChanged = TableOfContentsSelectionChanged
+    Options = [tvoAutoItemHeight, tvoHotTrack, tvoKeepCollapsedNodes, tvoReadOnly, tvoRowSelect, tvoShowButtons, tvoShowLines, tvoToolTips]
+  end
+  object Splitter: TSplitter
+    Left = 250
+    Height = 625
+    Top = 0
+    Width = 12
+    OnCanResize = SplitterCanResize
+  end
+  object CoverBox: TScrollBox
+    Left = 262
+    Height = 625
+    Top = 0
+    Width = 691
+    HorzScrollBar.Increment = 18
+    HorzScrollBar.Page = 660
+    HorzScrollBar.Tracking = True
+    VertScrollBar.Increment = 36
+    VertScrollBar.Page = 536
+    VertScrollBar.Tracking = True
+    Align = alClient
+    ChildSizing.TopBottomSpacing = 20
+    ClientHeight = 621
+    ClientWidth = 687
+    TabOrder = 2
+    Visible = False
+    OnResize = CoverBoxResize
+    object Cover: TImage
+      Left = 0
+      Height = 240
+      Top = 8
+      Width = 180
+      ImageIndex = -1
+      ImageWidth = 180
+    end
+    object LabelTitle: TLabel
+      Left = 0
+      Height = 28
+      Top = 260
+      Width = 133
+      Caption = '{BOOK TITLE}'
+      Font.Height = -21
+      ParentFont = False
+      OnClick = LabelTitleClick
+      OnMouseEnter = LabelTitleMouseEnter
+      OnMouseLeave = LabelTitleMouseLeave
+    end
+    object LabelWriter: TLabel
+      Left = 0
+      Height = 19
+      Top = 290
+      Width = 55
+      Caption = '{WRITER}'
+      Font.Height = -13
+      ParentFont = False
+    end
+    object LabelPlot: TLabel
+      Left = 10
+      Height = 20
+      Top = 496
+      Width = 48
+      Caption = '{PLOT}'
+      Font.Height = -15
+      ParentFont = False
+      WordWrap = True
+    end
+    object FlowPanel: TFlowPanel
+      Left = 10
+      Height = 66
+      Top = 324
+      Width = 650
+      AutoSize = True
+      BevelOuter = bvNone
+      Constraints.MaxWidth = 650
+      Constraints.MinWidth = 650
+      ControlList = <      
+        item
+          Control = Panel1
+          WrapAfter = waAuto
+          Index = 0
+        end      
+        item
+          Control = Panel2
+          WrapAfter = waAuto
+          Index = 1
+        end      
+        item
+          Control = Panel3
+          WrapAfter = waAuto
+          Index = 2
+        end      
+        item
+          Control = Panel4
+          WrapAfter = waAuto
+          Index = 3
+        end      
+        item
+          Control = Panel5
+          WrapAfter = waAuto
+          Index = 4
+        end      
+        item
+          Control = Panel6
+          WrapAfter = waAuto
+          Index = 5
+        end>
+      FlowLayout = tlTop
+      FlowStyle = fsLeftRightTopBottom
+      Font.Height = -13
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 0
+      object Panel1: TPanel
+        Left = 0
+        Height = 23
+        Top = 0
+        Width = 95
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 95
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 0
+        object LabelStateText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 32
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'State'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelState: TLabel
+          Left = 47
+          Height = 19
+          Top = 2
+          Width = 46
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{STATE}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+      object Panel2: TPanel
+        Left = 105
+        Height = 23
+        Top = 0
+        Width = 117
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 117
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 1
+        object LabelRegionText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 42
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'Region'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelRegion: TLabel
+          Left = 56
+          Height = 19
+          Top = 2
+          Width = 59
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{REGION}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+      object Panel3: TPanel
+        Left = 232
+        Height = 23
+        Top = 0
+        Width = 84
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 84
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 2
+        object LabelYearText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 27
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'Year'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelYear: TLabel
+          Left = 42
+          Height = 19
+          Top = 2
+          Width = 40
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{YEAR}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+      object Panel4: TPanel
+        Left = 326
+        Height = 23
+        Top = 0
+        Width = 104
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 104
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 3
+        object LabelGenreText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 37
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'Genre'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelGenre: TLabel
+          Left = 51
+          Height = 19
+          Top = 2
+          Width = 51
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{GENRE}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+      object Panel5: TPanel
+        Left = 0
+        Height = 23
+        Top = 33
+        Width = 204
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 204
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 4
+        object LabelLastUpdatedText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 80
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'Last updated'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelLastUpdated: TLabel
+          Left = 96
+          Height = 19
+          Top = 2
+          Width = 106
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{LAST_UPDATED}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+      object Panel6: TPanel
+        Left = 214
+        Height = 23
+        Top = 33
+        Width = 205
+        Anchors = []
+        AutoSize = True
+        BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 10
+        BevelOuter = bvSpace
+        ChildSizing.TopBottomSpacing = 1
+        ClientHeight = 23
+        ClientWidth = 205
+        Color = clHighlight
+        ParentBackground = False
+        ParentColor = False
+        TabOrder = 5
+        object LabelOriginalRunText: TLabel
+          Left = 7
+          Height = 19
+          Top = 2
+          Width = 73
+          BorderSpacing.Left = 6
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = 'Original run'
+          Color = clHighlightText
+          Font.Color = clWhite
+          Font.Height = -13
+          ParentColor = False
+          ParentFont = False
+        end
+        object LabelOriginalRun: TLabel
+          Left = 96
+          Height = 19
+          Top = 2
+          Width = 107
+          Alignment = taCenter
+          BorderSpacing.Right = 1
+          BorderSpacing.CellAlignHorizontal = ccaCenter
+          BorderSpacing.CellAlignVertical = ccaCenter
+          Caption = '{ORIGINAL_RUN}'
+          Color = clHighlightText
+          ParentColor = False
+          Transparent = False
+        end
+      end
+    end
+    object LabelPlotText: TLabel
+      Left = 10
+      Height = 24
+      Top = 458
+      Width = 34
+      Caption = 'Plot'
+      Font.Height = -17
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+  end
+  object PageListView: TListView
+    Left = 262
+    Height = 625
+    Top = 0
+    Width = 691
+    Align = alClient
+    AutoSort = False
+    Columns = <>
+    ColumnClick = False
+    HideSelection = False
+    IconOptions.AutoArrange = True
+    LargeImages = PageImageList
+    LargeImagesWidth = 150
+    OwnerData = True
+    ReadOnly = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 4
+    ViewStyle = vsIcon
+    OnCustomDrawItem = PageListViewCustomDrawItem
+    OnData = PageListViewData
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Height = 22
+    Top = 625
+    Width = 953
+    Panels = <    
+      item
+        Width = 500
+      end    
+      item
+        Width = 50
+      end>
+    SimplePanel = False
+  end
+  object PageImageList: TImageList
+    Height = 150
+    Width = 150
+    Left = 459
+    Top = 310
+  end
+end

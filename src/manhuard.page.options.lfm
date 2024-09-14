@@ -1,0 +1,56 @@
+inherited PageOptions: TPageOptions
+  Height = 466
+  Width = 770
+  ClientHeight = 466
+  ClientWidth = 770
+  DesignLeft = 465
+  DesignTop = 216
+  object ScrollBox: TScrollBox[0]
+    Left = 0
+    Height = 466
+    Top = 0
+    Width = 770
+    HorzScrollBar.Increment = 33
+    HorzScrollBar.Page = 338
+    HorzScrollBar.Smooth = True
+    HorzScrollBar.Tracking = True
+    VertScrollBar.Increment = 46
+    VertScrollBar.Page = 462
+    VertScrollBar.Smooth = True
+    VertScrollBar.Tracking = True
+    Align = alClient
+    ClientHeight = 462
+    ClientWidth = 749
+    TabOrder = 0
+    object Memo1: TMemo
+      Left = 8
+      Height = 172
+      Top = 8
+      Width = 330
+      Lines.Strings = (
+        'Memo1'
+      )
+      TabOrder = 0
+    end
+    object Memo2: TMemo
+      Left = 8
+      Height = 172
+      Top = 192
+      Width = 330
+      Lines.Strings = (
+        'Memo1'
+      )
+      TabOrder = 1
+    end
+    object Memo3: TMemo
+      Left = 8
+      Height = 312
+      Top = 376
+      Width = 330
+      Lines.Strings = (
+        'Memo1'
+      )
+      TabOrder = 2
+    end
+  end
+end

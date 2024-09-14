@@ -1,0 +1,55 @@
+object Form1: TForm1
+  Left = 328
+  Height = 490
+  Top = 250
+  Width = 662
+  Caption = 'Form1'
+  ClientHeight = 490
+  ClientWidth = 662
+  OnCreate = FormCreate
+  LCLVersion = '3.4.0.0'
+  object Memo1: TMemo
+    Left = 0
+    Height = 490
+    Top = 0
+    Width = 528
+    Align = alLeft
+    TabOrder = 0
+  end
+  object Button1: TButton
+    Left = 536
+    Height = 32
+    Top = 8
+    Width = 117
+    Caption = 'New task'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 536
+    Height = 32
+    Top = 88
+    Width = 117
+    Caption = 'Worker Count'
+    TabOrder = 2
+    OnClick = Button2Click
+  end
+  object Button3: TButton
+    Left = 536
+    Height = 32
+    Top = 129
+    Width = 117
+    Caption = 'Work Queue'
+    TabOrder = 3
+    OnClick = Button3Click
+  end
+  object Button4: TButton
+    Left = 536
+    Height = 32
+    Top = 168
+    Width = 117
+    Caption = 'Reduce Worker'
+    TabOrder = 4
+    OnClick = Button4Click
+  end
+end

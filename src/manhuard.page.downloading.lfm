@@ -1,0 +1,6 @@
+inherited PageDownloading: TPageDownloading
+  Height = 492
+  Width = 637
+  DesignLeft = 435
+  DesignTop = 209
+end

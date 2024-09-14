@@ -1,0 +1,9 @@
+object PageSearch: TPageSearch
+  Left = 0
+  Height = 446
+  Top = 0
+  Width = 632
+  TabOrder = 0
+  DesignLeft = 407
+  DesignTop = 137
+end

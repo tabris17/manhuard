@@ -1,0 +1,6 @@
+inherited StatefulPage: TStatefulPage
+  Height = 380
+  Width = 539
+  DesignLeft = 524
+  DesignTop = 434
+end

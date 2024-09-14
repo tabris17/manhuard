@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="\"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="manhuard"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="True"/>
+        <TextName Value="Fournoas.MangaHub.Manhuard"/>
+        <TextDesc Value=""/>
+      </XPManifest>
+      <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="..\icons\no-cover.png" Type="RCDATA" ResourceName="NO_COVER_LARGE"/>
+        <Resource_1 FileName="..\icons\no-cover-small.png" Type="RCDATA" ResourceName="NO_COVER_SMALL"/>
+      </Resources>
+    </General>
+    <i18n>
+      <EnableI18N Value="True"/>
+      <OutDir Value="..\locale"/>
+    </i18n>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <MajorVersionNr Value="1"/>
+      <BuildNr Value="6"/>
+      <StringTable CompanyName="Fournoas" InternalName="Manhuard" OriginalFilename="manhuard" ProductName="MangaHub"/>
+    </VersionInfo>
+    <BuildModes>
+      <Item Name="Default" Default="True"/>
+      <Item Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\build\manhuard"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <VerifyObjMethodCallValidity Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf3"/>
+              <UseHeaptrc Value="True"/>
+              <TrashVariables Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG"/>
+            <OtherDefines Count="1">
+              <Define0 Value="DEBUG"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item>
+      <Item Name="Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\build\manhuard"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+        </CompilerOptions>
+      </Item>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+    </RunParams>
+    <RequiredPackages>
+      <Item>
+        <PackageName Value="SQLDBLaz"/>
+      </Item>
+      <Item>
+        <PackageName Value="python4lazarus_package"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
+    </RequiredPackages>
+    <Units>
+      <Unit>
+        <Filename Value="manhuard.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.strings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Strings"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.debug.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Debug"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.logging.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Logging"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.config.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Config"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.form.main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Manhuard.Form.Main"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.python.module.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Python.Module"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.home.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageHome"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Home"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.addmanga.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageAddManga"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.AddManga"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.search.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageSearch"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Search"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.downloading.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageDownloading"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Downloading"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.bookmark.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageBookmark"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Bookmark"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.options.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageOptions"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Options"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.bookshelf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageBookshelf"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Bookshelf"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.pages.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Pages"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.types.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Types"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.frame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FramePage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Frame"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.frame.fullwidth.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FullwidthPage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Frame.Fullwidth"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.about.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageAbout"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.About"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.page.book.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="PageBook"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Page.Book"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.manga.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Manga"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.frame.stateful.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StatefulPage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Frame.Stateful"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.workpool.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.WorkPool"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.manga.loader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Manga.Loader"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.manga.reader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Manga.Reader"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.frame.book.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FrameBook"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="Manhuard.Frame.Book"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.form.book.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormBook"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Manhuard.Form.Book"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.helper.listview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Helper.ListView"/>
+      </Unit>
+      <Unit>
+        <Filename Value="manhuard.helper.picture.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Manhuard.Helper.Picture"/>
+      </Unit>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="..\build\manhuard"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf3"/>
+      </Debugging>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions>
+      <Item>
+        <Name Value="EAbort"/>
+      </Item>
+      <Item>
+        <Name Value="ECodetoolError"/>
+      </Item>
+      <Item>
+        <Name Value="EFOpenError"/>
+      </Item>
+      <Item>
+        <Name Value="EJSON"/>
+      </Item>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

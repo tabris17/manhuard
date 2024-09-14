@@ -1,0 +1,6 @@
+inherited PageBookmark: TPageBookmark
+  Height = 408
+  Width = 664
+  DesignLeft = 400
+  DesignTop = 134
+end

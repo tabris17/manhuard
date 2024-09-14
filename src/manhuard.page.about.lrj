@@ -1,0 +1,11 @@
+{"version":1,"strings":[
+{"hash":4691652,"name":"tpageabout.labeltitle.caption","sourcebytes":[65,98,111,117,116],"value":"About"},
+{"hash":105232285,"name":"tpageabout.labelappname.caption","sourcebytes":[123,65,80,80,95,78,65,77,69,125],"value":"{APP_NAME}"},
+{"hash":47223322,"name":"tpageabout.label1.caption","sourcebytes":[83,111,117,114,99,101,32,99,111,100,101,58],"value":"Source code:"},
+{"hash":180620842,"name":"tpageabout.label2.caption","sourcebytes":[68,111,99,117,109,101,110,116,58],"value":"Document:"},
+{"hash":4199837,"name":"tpageabout.labelsourcecode.caption","sourcebytes":[123,85,82,76,95,83,79,85,82,67,69,125],"value":"{URL_SOURCE}"},
+{"hash":49525389,"name":"tpageabout.labeldocument.caption","sourcebytes":[123,85,82,76,95,68,79,67,85,77,69,78,84,125],"value":"{URL_DOCUMENT}"},
+{"hash":229498717,"name":"tpageabout.statictextdescription.caption","sourcebytes":[123,65,80,80,95,68,69,83,67,82,73,80,84,73,79,78,125],"value":"{APP_DESCRIPTION}"},
+{"hash":204652698,"name":"tpageabout.label3.caption","sourcebytes":[68,101,118,101,108,111,112,101,114,58],"value":"Developer:"},
+{"hash":176930877,"name":"tpageabout.labeldeveloper.caption","sourcebytes":[123,68,69,86,69,76,79,80,69,82,125],"value":"{DEVELOPER}"}
+]}

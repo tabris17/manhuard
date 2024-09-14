@@ -1,0 +1,23 @@
+inherited PageAddMangaHelp: TPageAddMangaHelp
+  Height = 433
+  Width = 685
+  ClientHeight = 433
+  ClientWidth = 685
+  OnResize = FrameResize
+  inherited Navbar: TToolBar
+    Width = 685
+    inherited LabelTitle: TLabel
+      Width = 199
+      Caption = 'How to Add a Manga'
+    end
+  end
+  object StaticTextHelp: TStaticText[1]
+    Left = 24
+    Height = 302
+    Top = 48
+    Width = 400
+    TabOrder = 1
+  end
+  inherited ImageList: TImageList[2]
+  end
+end

@@ -1,0 +1,471 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: manhuard.frame.book.not_access
+msgid "N/A"
+msgstr ""
+
+#: manhuard.frame.book.page_count
+#, object-pascal-format
+msgctxt "manhuard.frame.book.page_count"
+msgid "%d pages"
+msgstr ""
+
+#: manhuard.frame.book.present
+msgid "present"
+msgstr ""
+
+#: manhuard.frame.book.state_completed
+msgctxt "manhuard.frame.book.state_completed"
+msgid "Completed"
+msgstr ""
+
+#: manhuard.frame.book.state_ongoing
+msgid "Ongoing"
+msgstr ""
+
+#: manhuard.frame.book.written_by
+msgid "By "
+msgstr ""
+
+#: manhuard.page.bookshelf.lv_short_caption
+#, object-pascal-format
+msgid ""
+"%s\n"
+"by %s"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_loading
+msgctxt "manhuard.page.bookshelf.msg_loading"
+msgid "Loading"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_no
+msgid "No"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_sel_count
+#, object-pascal-format
+msgctxt "manhuard.page.bookshelf.msg_sel_count"
+msgid "Sel %d"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_sel_total
+#, object-pascal-format
+msgctxt "manhuard.page.bookshelf.msg_sel_total"
+msgid "Total %d/%d"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_total
+#, object-pascal-format
+msgctxt "manhuard.page.bookshelf.msg_total"
+msgid "Total %d"
+msgstr ""
+
+#: manhuard.page.bookshelf.msg_yes
+msgid "Yes"
+msgstr ""
+
+#: manhuard.strings.app_description
+msgid "An opensource software for downloading and managing manga books, and it can also be used as a manga viewer."
+msgstr ""
+
+#: manhuard.strings.app_name
+msgctxt "manhuard.strings.app_name"
+msgid "Manhuard"
+msgstr ""
+
+#: manhuard.strings.msg_config_save_error
+#, object-pascal-format
+msgctxt "manhuard.strings.msg_config_save_error"
+msgid "Failed to save config file: \"%s\"."
+msgstr ""
+
+#: manhuard.strings.text_add_manga_help
+msgctxt "manhuard.strings.text_add_manga_help"
+msgid ""
+"Currently supported manga websites are:\n"
+"    - Manhuagui (https://www.manhuagui.com)\n"
+"\n"
+"In some regions, you know, the proxy is necessary to access these websites."
+msgstr ""
+
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
+#: tformmain.actionabout.caption
+msgctxt "tformmain.actionabout.caption"
+msgid "About"
+msgstr ""
+
+#: tformmain.actionaddmanga.caption
+msgid "Add manga"
+msgstr ""
+
+#: tformmain.actionbookmark.caption
+msgctxt "tformmain.actionbookmark.caption"
+msgid "Bookmark"
+msgstr ""
+
+#: tformmain.actionbookmark.hint
+msgctxt "tformmain.actionbookmark.hint"
+msgid "Bookmark"
+msgstr ""
+
+#: tformmain.actionbookshelf.caption
+msgctxt "tformmain.actionbookshelf.caption"
+msgid "Bookshelf"
+msgstr ""
+
+#: tformmain.actionbookshelf.hint
+msgctxt "tformmain.actionbookshelf.hint"
+msgid "Bookshelf"
+msgstr ""
+
+#: tformmain.actiondownloading.caption
+msgctxt "tformmain.actiondownloading.caption"
+msgid "Downloading"
+msgstr ""
+
+#: tformmain.actiondownloading.hint
+msgctxt "tformmain.actiondownloading.hint"
+msgid "Downloading"
+msgstr ""
+
+#: tformmain.actionexit.caption
+msgctxt "tformmain.actionexit.caption"
+msgid "E&xit"
+msgstr ""
+
+#: tformmain.actionhome.caption
+msgctxt "tformmain.actionhome.caption"
+msgid "Home"
+msgstr ""
+
+#: tformmain.actionhome.hint
+msgctxt "tformmain.actionhome.hint"
+msgid "Home"
+msgstr ""
+
+#: tformmain.actionoptions.caption
+msgctxt "tformmain.actionoptions.caption"
+msgid "Options"
+msgstr ""
+
+#: tformmain.actionoptions.hint
+msgctxt "tformmain.actionoptions.hint"
+msgid "Options"
+msgstr ""
+
+#: tformmain.actionsearch.caption
+msgctxt "tformmain.actionsearch.caption"
+msgid "Search"
+msgstr ""
+
+#: tformmain.actionsearch.hint
+msgctxt "tformmain.actionsearch.hint"
+msgid "Search"
+msgstr ""
+
+#: tformmain.menuitem1.caption
+msgid "&File"
+msgstr ""
+
+#: tformmain.menuitem2.caption
+msgctxt "tformmain.menuitem2.caption"
+msgid "&Help"
+msgstr ""
+
+#: tformmain.menuitem4.caption
+msgid "&About"
+msgstr ""
+
+#: tformmain.toolbuttonmainmenu.hint
+msgctxt "tformmain.toolbuttonmainmenu.hint"
+msgid "Open main menu"
+msgstr ""
+
+#: tframebook.labelgenre.caption
+msgid "{GENRE}"
+msgstr ""
+
+#: tframebook.labelgenretext.caption
+msgctxt "tframebook.labelgenretext.caption"
+msgid "Genre"
+msgstr ""
+
+#: tframebook.labellastupdated.caption
+msgid "{LAST_UPDATED}"
+msgstr ""
+
+#: tframebook.labellastupdatedtext.caption
+msgctxt "tframebook.labellastupdatedtext.caption"
+msgid "Last updated"
+msgstr ""
+
+#: tframebook.labeloriginalrun.caption
+msgid "{ORIGINAL_RUN}"
+msgstr ""
+
+#: tframebook.labeloriginalruntext.caption
+msgid "Original run"
+msgstr ""
+
+#: tframebook.labelplot.caption
+msgctxt "tframebook.labelplot.caption"
+msgid "{PLOT}"
+msgstr ""
+
+#: tframebook.labelplottext.caption
+msgctxt "tframebook.labelplottext.caption"
+msgid "Plot"
+msgstr ""
+
+#: tframebook.labelregion.caption
+msgid "{REGION}"
+msgstr ""
+
+#: tframebook.labelregiontext.caption
+msgctxt "tframebook.labelregiontext.caption"
+msgid "Region"
+msgstr ""
+
+#: tframebook.labelstate.caption
+msgid "{STATE}"
+msgstr ""
+
+#: tframebook.labelstatetext.caption
+msgid "State"
+msgstr ""
+
+#: tframebook.labeltitle.caption
+msgctxt "tframebook.labeltitle.caption"
+msgid "{BOOK TITLE}"
+msgstr ""
+
+#: tframebook.labelwriter.caption
+msgid "{WRITER}"
+msgstr ""
+
+#: tframebook.labelyear.caption
+msgid "{YEAR}"
+msgstr ""
+
+#: tframebook.labelyeartext.caption
+msgctxt "tframebook.labelyeartext.caption"
+msgid "Year"
+msgstr ""
+
+#: tfullwidthpage.navbar.caption
+msgctxt "tfullwidthpage.navbar.caption"
+msgid "Navbar"
+msgstr ""
+
+#: tfullwidthpage.toolbuttonback.hint
+msgctxt "tfullwidthpage.toolbuttonback.hint"
+msgid "Back"
+msgstr ""
+
+#: tpageabout.label1.caption
+msgid "Source code:"
+msgstr ""
+
+#: tpageabout.label2.caption
+msgid "Document:"
+msgstr ""
+
+#: tpageabout.label3.caption
+msgid "Developer:"
+msgstr ""
+
+#: tpageabout.labelappname.caption
+msgid "{APP_NAME}"
+msgstr ""
+
+#: tpageabout.labeldeveloper.caption
+msgid "{DEVELOPER}"
+msgstr ""
+
+#: tpageabout.labeldocument.caption
+msgid "{URL_DOCUMENT}"
+msgstr ""
+
+#: tpageabout.labelsourcecode.caption
+msgid "{URL_SOURCE}"
+msgstr ""
+
+#: tpageabout.labeltitle.caption
+msgctxt "tpageabout.labeltitle.caption"
+msgid "About"
+msgstr ""
+
+#: tpageabout.statictextdescription.caption
+msgid "{APP_DESCRIPTION}"
+msgstr ""
+
+#: tpageaddmanga.editmangaurl.editlabel.caption
+msgctxt "tpageaddmanga.editmangaurl.editlabel.caption"
+msgid "Input manga URL:"
+msgstr ""
+
+#: tpageaddmanga.labeltitle.caption
+msgid "Add Manga"
+msgstr ""
+
+#: tpagebookshelf.actiondetailsview.caption
+msgctxt "tpagebookshelf.actiondetailsview.caption"
+msgid "Details"
+msgstr ""
+
+#: tpagebookshelf.actionfilter.caption
+msgctxt "tpagebookshelf.actionfilter.caption"
+msgid "Apply filter"
+msgstr ""
+
+#: tpagebookshelf.actionfilter.hint
+msgctxt "tpagebookshelf.actionfilter.hint"
+msgid "Apply filter"
+msgstr ""
+
+#: tpagebookshelf.actionlargecoversview.caption
+msgctxt "tpagebookshelf.actionlargecoversview.caption"
+msgid "Large covers"
+msgstr ""
+
+#: tpagebookshelf.actionopen.caption
+msgctxt "tpagebookshelf.actionopen.caption"
+msgid "Open"
+msgstr ""
+
+#: tpagebookshelf.actionopen.hint
+msgctxt "tpagebookshelf.actionopen.hint"
+msgid "Open"
+msgstr ""
+
+#: tpagebookshelf.actionopeninnewwindow.caption
+msgctxt "tpagebookshelf.actionopeninnewwindow.caption"
+msgid "Open in new window"
+msgstr ""
+
+#: tpagebookshelf.actionopeninnewwindow.hint
+msgctxt "tpagebookshelf.actionopeninnewwindow.hint"
+msgid "Open in new window"
+msgstr ""
+
+#: tpagebookshelf.actionrefresh.caption
+msgctxt "tpagebookshelf.actionrefresh.caption"
+msgid "Refresh"
+msgstr ""
+
+#: tpagebookshelf.actionrefresh.hint
+msgctxt "tpagebookshelf.actionrefresh.hint"
+msgid "Refresh"
+msgstr ""
+
+#: tpagebookshelf.actionremove.caption
+msgctxt "tpagebookshelf.actionremove.caption"
+msgid "Remove"
+msgstr ""
+
+#: tpagebookshelf.actionremove.hint
+msgctxt "tpagebookshelf.actionremove.hint"
+msgid "Remove"
+msgstr ""
+
+#: tpagebookshelf.actionsmallcoversview.caption
+msgctxt "tpagebookshelf.actionsmallcoversview.caption"
+msgid "Small covers"
+msgstr ""
+
+#: tpagebookshelf.editfilter.texthint
+msgctxt "tpagebookshelf.editfilter.texthint"
+msgid "Filter"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[0].caption
+msgid "Title"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[1].caption
+msgid "Vol"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[2].caption
+msgctxt "tpagebookshelf.listview.columns[2].caption"
+msgid "Writer"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[3].caption
+msgctxt "tpagebookshelf.listview.columns[3].caption"
+msgid "Year"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[4].caption
+msgctxt "tpagebookshelf.listview.columns[4].caption"
+msgid "Region"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[5].caption
+msgctxt "tpagebookshelf.listview.columns[5].caption"
+msgid "Genre"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[6].caption
+msgctxt "tpagebookshelf.listview.columns[6].caption"
+msgid "Last updated"
+msgstr ""
+
+#: tpagebookshelf.listview.columns[7].caption
+msgctxt "tpagebookshelf.listview.columns[7].caption"
+msgid "Completed"
+msgstr ""
+
+#: tpagebookshelf.menuitem6.caption
+msgctxt "tpagebookshelf.menuitem6.caption"
+msgid "Edit"
+msgstr ""
+
+#: tpagebookshelf.menuitem6.hint
+msgctxt "tpagebookshelf.menuitem6.hint"
+msgid "Edit"
+msgstr ""
+
+#: tpagebookshelf.menuitemempty.caption
+msgid "(Empty)"
+msgstr ""
+
+#: tpagebookshelf.toolbutton3.caption
+msgid "ToolButton3"
+msgstr ""
+
+#: tpagebookshelf.toolbutton4.caption
+msgid "ToolButton4"
+msgstr ""
+
+#: tpagebookshelf.toolbuttonview.hint
+msgid "Select view"
+msgstr ""
+
+#: tpagedownloading.virtualstringtree1.header.columns[0].text
+msgid "sdfsdf"
+msgstr ""
+
+#: tpagedownloading.virtualstringtree1.header.columns[1].text
+msgctxt "tpagedownloading.virtualstringtree1.header.columns[1].text"
+msgid "sadsad"
+msgstr ""
+
+#: tpagedownloading.virtualstringtree1.header.columns[2].text
+msgctxt "tpagedownloading.virtualstringtree1.header.columns[2].text"
+msgid "sadsad"
+msgstr ""
+
+#: tpagedownloading.virtualstringtree1.header.columns[3].text
+msgid "tre435"
+msgstr ""
+
+#: tpagehome.button1.caption
+msgid "Button1"
+msgstr ""
+

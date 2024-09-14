@@ -1,0 +1,4 @@
+{"version":1,"strings":[
+{"hash":106120049,"name":"tpageaddmanga.labeltitle.caption","sourcebytes":[65,100,100,32,77,97,110,103,97],"value":"Add Manga"},
+{"hash":22123978,"name":"tpageaddmanga.editmangaurl.editlabel.caption","sourcebytes":[73,110,112,117,116,32,109,97,110,103,97,32,85,82,76,58],"value":"Input manga URL:"}
+]}
