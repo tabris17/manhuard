@@ -54,13 +54,13 @@ type
     procedure TableOfContentsSelectionChanged(Sender: TObject);
   private
     FBook: TMangaBook;
-    FDetail: TMangaBook.TDetail;
+    FDetail: TMangaBook.TDetails;
     FBusy: boolean;
     FSelectedVolume: TMangaBook.PVolume;
     FSelectedVolumePages: TMangaBook.TPageArray;
     procedure SetBook(AValue: TMangaBook);
     procedure Rearrange;
-    procedure ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetail);
+    procedure ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetails);
     procedure ReadFailure(Sender: TMangaManager.TReadBookWork; Error: TMangaManager.TReadBookWork.TError);
     procedure ReadVolumeSuccess(Sender: TMangaManager.TReadVolumeWork; Return: TMangaBook.TPageArray);
     procedure ReadVolumeFailure(Sender: TMangaManager.TReadVolumeWork; Error: TMangaManager.TReadBookWork.TError);
@@ -237,7 +237,7 @@ begin
   LabelPlot.Top := FlowPanelBottom + 50;
 end;
 
-procedure TFrameBook.ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetail);
+procedure TFrameBook.ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetails);
 begin
   FDetail := Return;
   if Return.Source = EmptyStr then

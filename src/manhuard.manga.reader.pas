@@ -5,39 +5,45 @@ unit Manhuard.Manga.Reader;
 interface
 
 uses
-  Classes, SysUtils, Graphics, fpjson, jsonparser, Generics.Collections, Manhuard.Manga, Manhuard.Helper.ListView;
+  Classes, SysUtils, Graphics, fpjson, jsonparser, Generics.Collections, Unzip, ZipUtils, LibTar,
+  Manhuard.Manga, Manhuard.Helper.ListView;
+
+const
+  MANGA_PACKAGE_TYPES : array[mptZip..mptEPub] of string = ('.cbz', '.cba', '.cbr', '.epub');
+  MANGA_BOOK_JSON_FILE_NAME = 'book.json';
 
 type
 
   TMangaBookCoverResolutionType = (birtSmall, birtLarge);
   TMangaBookCoverManager = specialize TListViewIconManager<TMangaBookCoverResolutionType>;
 
-  { TMangaBookCoverLoader }
+  { TMangaCoverLoader }
 
-  TMangaBookCoverLoader = class(TMangaBookCoverManager.TLoadIconsWork)
+  TMangaCoverLoader = class(TMangaBookCoverManager.TLoadIconsWork)
   type
     TIndexBookPair = specialize TPair<Integer, TMangaBook>;
     TIndexBookPairArray = array of TIndexBookPair;
   private
     FIndexBookPairArray: TIndexBookPairArray;
+    FManager: TMangaBookCoverManager;
   public
-    constructor Create(IndexBookPairArray: TIndexBookPairArray);
+    constructor Create(Manager: TMangaBookCoverManager; IndexBookPairArray: TIndexBookPairArray);
     function Execute: TMangaBookCoverManager.TIndexIconPairArray; override;
   end;
 
-  { TMangaDetailReader }
+  { TMangaDetailsLoader }
 
-  TMangaDetailReader = class(TMangaManager.TReadBookWork)
+  TMangaDetailsLoader = class(TMangaManager.TReadBookWork)
   private
     FBook: TMangaBook;
   public
     constructor Create(Book: TMangaBook);
-    function Execute: TMangaBook.TDetail; override;
+    function Execute: TMangaBook.TDetails; override;
   end;
 
-  { TMangaVolumeReader }
+  { TMangaVolumeLoader }
 
-  TMangaVolumeReader = class(TMangaManager.TReadVolumeWork)
+  TMangaVolumeLoader = class(TMangaManager.TReadVolumeWork)
   private
     FBook: TMangaBook;
     FVolume: TMangaBook.PVolume;
@@ -68,7 +74,8 @@ type
     property Path: string read FPath;
     property Item[SubdirName: string]: TVirtualDirectory read GetItem; default;
     property Name: string read GetName;
-    function FindVolumes(VolumeList: TVolumeList = nil): Integer;
+    function FindVolumes(VolumeList: TVolumeList): Integer;
+    function VolumeCount: Integer;
     procedure AddFile(FilePath: string);
   end;
 
@@ -83,31 +90,107 @@ type
     function ReadArraySize(Path: string): SizeInt;
   end;
 
-  { TMangaBookReader }
+  { TReader }
 
-  TMangaBookReader = class helper for TMangaBook
-  type
-    {TCover = class(TPicture)
-    public
-      procedure LoadFromBook(const Book: TMangaBook);
-    end;}
+  TReader = class abstract
   private
-    function OpenJSON(out Stream: TStream; out Parser: TJSONParser): boolean;
-    function DefaultName: string;
-    function GetAnyFile(Paths: TStringArray): string;
-    procedure FindVolumes(VolumeList: TVolumeList = nil);
-    procedure ReadFromJSON(JSONData: TJSONData; Detail: TMangaBook.PDetail);
+    function GetDir: TVirtualDirectory;
+  protected
+    FPath: string;
+    FVDir: TVirtualDirectory;
+    FLoaded: boolean;
+    procedure LoadFiles; virtual; abstract;
   public
+    constructor Create(Path: string);
+    destructor Destroy; override;
+    function GetFile(FilePath: string; out Stream: TStream): boolean; virtual; abstract;
+    function FileExists(FilePath: string): boolean; virtual; abstract;
+    property Dir: TVirtualDirectory read GetDir;
+  end;
+
+  { TMangaBookHelper }
+
+  TMangaBookHelper = class helper for TMangaBook
+  private
+    function GetReader: TReader;
+    function OpenMetaFile(AReader: TReader; out Parser: TJSONParser): boolean;
+    function DefaultName: string;
+    procedure ReadFromMetaFile(AReader: TReader; JSONData: TJSONData; Details: TMangaBook.PDetails);
+  public
+    property Reader: TReader read GetReader;
     procedure Read;
-    procedure Read(out Detail: TMangaBook.TDetail);
-    procedure Read(VolumePath: string; out PageArray: TMangaBook.TPageArray);
-    procedure Read(FilePath: string; Picture: TPicture);
+    procedure Read(AReader: TReader);
+    procedure Read(out Details: TMangaBook.TDetails);
+    procedure Read(AReader: TReader; out Details: TMangaBook.TDetails);
+    //procedure Read(VolumePath: string; out PageArray: TMangaBook.TPageArray);
+    //procedure Read(FilePath: string; Picture: TPicture);
+  end;
+
+  { TDirReader }
+
+  TDirReader = class(TReader)
+  public
+    function GetFile(FilePath: string; out Stream: TStream): boolean; override;
+    function FileExists(FilePath: string): boolean; override;
+  protected
+    procedure LoadFiles; override;
+  end;
+
+  { TZipReader }
+
+  TZipReader = class(TReader)
+  private
+    FZipFile: unzFile;
+  public
+    constructor Create(Path: string);
+    destructor Destroy; override;
+    function GetFile(FilePath: string; out Stream: TStream): boolean; override;
+    function FileExists(FilePath: string): boolean; override;
+  protected
+    procedure LoadFiles; override;
+  end;
+
+  { TRarReader }
+
+  TRarReader = class(TReader)
+
+  end;
+
+  { TTarReader }
+
+  TTarReader = class(TReader)
+
+  end;
+
+  { TEPubReader }
+
+  TEPubReader = class(TReader)
+
   end;
 
 
 implementation
 
-uses LazUTF8, LazFileUtils, DateUtils, jsonscanner, Unzip, ZipUtils, Manhuard.Manga.Loader, Manhuard.Helper.Picture;
+uses LazUTF8, LazFileUtils, DateUtils, jsonscanner, Manhuard.Manga.Loader, Manhuard.Helper.Picture;
+
+procedure LoadFilesFromDir(BasePath: string; Path: string; VDir: TVirtualDirectory);
+var
+  SearchRec: TSearchRec;
+  SubItem: string;
+begin
+  if FindFirst(ConcatPaths([BasePath, Path, '*']), faAnyFile, SearchRec) <> 0 then Exit;
+  repeat
+    {$warn 5044 off}
+    if string(SearchRec.Name).StartsWith('.'){$ifdef Windows} or (faHidden and SearchRec.Attr > 0){$endif} then continue;
+    {$warn 5044 on}
+    SubItem := ConcatPaths([Path, SearchRec.Name]);
+    if faDirectory and SearchRec.Attr = 0 then
+      VDir.AddFile(SubItem)
+    else
+      LoadFilesFromDir(BasePath, SubItem, VDir);
+  until FindNext(SearchRec) <> 0;
+  FindClose(SearchRec);
+end;
 
 function GetFirstDir(Path: string): string; inline;
 var
@@ -126,7 +209,7 @@ begin
   end;
 end;
 
-function FindVolumesFromDirectory(BasePath, Path: string; VolumeList: TVolumeList; FileCount: PInteger = nil): Integer;
+{function FindVolumesFromDirectory(BasePath, Path: string; VolumeList: TVolumeList; FileCount: PInteger = nil): Integer;
 var
   SearchRec: TSearchRec;
   SubdirCount, TheFileCount, SubFileCount: Integer;
@@ -167,35 +250,6 @@ begin
   end;
 end;
 
-function FindVolumesFromZipFile(Path: string; VolumeList: TVolumeList): Integer;
-var
-  ZipFile: unzFile;
-  UnzFileInfo: unz_file_info;
-  FileName: shortstring;
-  VDir: TVirtualDirectory;
-begin
-  Result := 0;
-  VDir := TVirtualDirectory.Create;
-  try
-    ZipFile := unzOpen(PChar(Path));
-    try
-      if unzGoToFirstFile(ZipFile) = UNZ_OK then
-      begin
-        repeat
-          unzGetCurrentFileInfo(ZipFile, @UnzFileInfo, @Filename[1], Sizeof(Filename) - 1, nil, 0, nil, 0);
-          Filename[0] := Char(UnzFileInfo.size_filename);
-          VDir.AddFile(WinCPToUTF8(Filename));
-        until unzGoToNextFile(ZipFile) <> UNZ_OK;
-      end;
-    finally
-      unzClose(ZipFile);
-    end;
-    Result := VDir.FindVolumes(VolumeList);
-  finally
-    VDir.Free;
-  end;
-end;
-
 procedure ReadVolumeFromDirectory(Path: string; var PageArray: TMangaBook.TPageArray);
 var
   SearchRec: TSearchrec;
@@ -217,16 +271,17 @@ begin
     until FindNext(SearchRec) <> 0;
     FindClose(SearchRec);
   end;
-end;
+end;}
 
-{ TMangaBookCoverLoader }
+{ TMangaCoverLoader }
 
-constructor TMangaBookCoverLoader.Create(IndexBookPairArray: TIndexBookPairArray);
+constructor TMangaCoverLoader.Create(Manager: TMangaBookCoverManager; IndexBookPairArray: TIndexBookPairArray);
 begin
+  FManager := Manager;
   FIndexBookPairArray := IndexBookPairArray;
 end;
 
-function TMangaBookCoverLoader.Execute: TMangaBookCoverManager.TIndexIconPairArray;
+function TMangaCoverLoader.Execute: TMangaBookCoverManager.TIndexIconPairArray;
 var
   IndexBook: TIndexBookPair;
   Book: TMangaBook;
@@ -243,12 +298,15 @@ begin
     Cover := TPicture.Create;
     try
       Book := IndexBook.Value;
-      Book.Read(Book.Cover, Cover);
+      //Book.Read(Book.Cover, Cover);
+      { todo: }
+      Cover.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
       SmallCover := TPicture.Create;
       SmallCover.Assign(Cover);
-      ResizePicture(SmallCover, 60, 80);
+      with FManager.Resolutions[birtSmall] do SmallCover.Resize(Width, Height);
       LargeCover := TPicture.Create;
       LargeCover.Assign(Cover);
+      with FManager.Resolutions[birtLarge] do LargeCover.Resize(Width, Height);
       Result[i].Key := IndexBook.Key;
       Result[i].Value[birtSmall] := SmallCover;
       Result[i].Value[birtLarge] := LargeCover;
@@ -258,31 +316,31 @@ begin
   end;
 end;
 
-{ TMangaDetailReader }
+{ TMangaDetailsLoader }
 
-constructor TMangaDetailReader.Create(Book: TMangaBook);
+constructor TMangaDetailsLoader.Create(Book: TMangaBook);
 begin
   FBook := Book;
 end;
 
-function TMangaDetailReader.Execute: TMangaBook.TDetail;
+function TMangaDetailsLoader.Execute: TMangaBook.TDetails;
 begin
   FBook.Read(Result);
 end;
 
-{ TMangaVolumeReader }
+{ TMangaVolumeLoader }
 
-constructor TMangaVolumeReader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume);
+constructor TMangaVolumeLoader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume);
 begin
   FBook := Book;
   FVolume := Volume;
 end;
 
-function TMangaVolumeReader.Execute: TMangaBook.TPageArray;
+function TMangaVolumeLoader.Execute: TMangaBook.TPageArray;
 begin
   Result := [];
   SetLength(Result, FVolume^.PageCount);
-  FBook.Read(FVolume^.Path, Result);
+  //FBook.Read(FVolume^.Path, Result);
   FVolume^.PageCount := Length(Result);
 end;
 
@@ -293,7 +351,7 @@ var
   Subdir: TVirtualDirectory;
 begin
   for Subdir in FDirList do if Subdir.Name = SubdirName then Exit(Subdir);
-  Result := TVirtualDirectory.Create(specialize IfThen<string>(FPath = EmptyStr, SubdirName,ConcatPaths([FPath, SubdirName])));
+  Result := TVirtualDirectory.Create(specialize IfThen<string>(FPath = EmptyStr, SubdirName, ConcatPaths([FPath, SubdirName])));
   FDirList.Add(Result);
 end;
 
@@ -333,16 +391,22 @@ var
 begin
   if FDirList.Count = 0 then
   begin
-    if VolumeList <> nil then
-    begin
-      Volume.Path := FPath;
-      Volume.PageCount := FFileCount;
-      VolumeList.Add(Volume);
-    end;
+    Volume.Path := FPath;
+    Volume.PageCount := FFileCount;
+    VolumeList.Add(Volume);
     Exit(1);
   end;
   Result := 0;
   for Subdir in FDirList do Inc(Result, Subdir.FindVolumes(VolumeList));
+end;
+
+function TVirtualDirectory.VolumeCount: Integer;
+var
+  Subdir: TVirtualDirectory;
+begin
+  Result := 0;
+  if FDirList.Count = 0 then Exit(1);
+  for Subdir in FDirList do Inc(Result, Subdir.VolumeCount);
 end;
 
 procedure TVirtualDirectory.AddFile(FilePath: string);
@@ -436,87 +500,50 @@ begin
   Result := TJSONArray(Data).Count;
 end;
 
-{ TMangaBookReader }
+{ TMangaBookHelper }
 
-function TMangaBookReader.OpenJSON(out Stream: TStream; out Parser: TJSONParser): boolean;
-var
-  ZipFile: unzFile;
-  UnzFileInfo: unz_file_info;
-  FileName: shortstring;
-  TryFileName: string;
+function TMangaBookHelper.GetReader: TReader;
 begin
-  if FPackageType = mptZipped then
-  begin
-    ZipFile := unzOpen(PChar(FPath));
-    try
-      if unzLocateFile(ZipFile, PChar(BOOK_JSON_FILE_NAME), 2) = UNZ_OK then
-      else if (unzGoToFirstFile(ZipFile) = UNZ_OK) and
-              (unzGetCurrentFileInfo(ZipFile, @UnzFileInfo, @FileName[1], Sizeof(FileName) - 1, nil, 0, nil, 0) = UNZ_OK) then
-      begin
-        FileName[0] := Char(UnzFileInfo.size_filename);
-        TryFileName := ConcatPaths([GetFirstDir(FileName), BOOK_JSON_FILE_NAME]);
-        if (TryFileName = BOOK_JSON_FILE_NAME) or (unzLocateFile(ZipFile, PChar(TryFileName), 2) <> UNZ_OK) then Exit(False);
-      end
-      else Exit(False);
-      if unzGetCurrentFileInfo(ZipFile, @UnzFileInfo, @FileName[1], Sizeof(FileName) - 1, nil, 0, nil, 0) <> UNZ_OK then Exit(False);
-      if unzOpenCurrentFile(ZipFile) <> UNZ_OK then Exit(False);
-      try
-        Stream := TMemoryStream.Create;
-        Stream.Size := UnzFileInfo.uncompressed_size;
-        unzReadCurrentFile(ZipFile, TMemoryStream(Stream).Memory, Stream.Size);
-      finally
-        unzCloseCurrentFile(ZipFile);
-      end;
-    finally
-      unzClose(ZipFile);
-    end;
-  end
+  case PackageType of
+    mptDir: Result := TDirReader.Create(Path);
+    mptZip: Result := TZipReader.Create(Path);
+    mptTar: Result := TTarReader.Create(Path);
+    mptRar: Result := TRarReader.Create(Path);
+    mptEPub: Result := TEPubReader.Create(Path);
   else
-  begin
-    Stream := TFileStream.Create(ConcatPaths([FPath, BOOK_JSON_FILE_NAME]), fmOpenRead or fmShareDenyWrite);
+    raise EArgumentOutOfRangeException.Create('Not implemented');
   end;
-  Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
+end;
+
+function TMangaBookHelper.OpenMetaFile(AReader: TReader; out Parser: TJSONParser): boolean;
+var
+  Stream: TStream;
+begin
+  Result := AReader.GetFile(MANGA_BOOK_JSON_FILE_NAME, Stream);
+  if not Result then Exit(False);
+  try
+    Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
+  finally
+    Stream.Free;
+  end;
   Result := True;
 end;
 
-function TMangaBookReader.DefaultName: string;
+function TMangaBookHelper.DefaultName: string;
 begin
-  Result := specialize IfThen<string>(FPackageType = mptZipped, ExtractFileNameOnly(FPath), ExtractFilename(FPath));
+  Result := specialize IfThen<string>(FPackageType = mptZip, ExtractFileNameOnly(FPath), ExtractFilename(FPath));
 end;
 
-function TMangaBookReader.GetAnyFile(Paths: TStringArray): string;
-var
-  Path: string;
-  ZipFile: unzFile;
-begin
-  case FPackageType of
-    mptDirectory: begin
-      for Path in Paths do if FileExists(ConcatPaths([FPath, Path])) then Exit(Path);
-    end;
-    mptZipped: begin
-      for Path in Paths do
-      begin
-        ZipFile := unzOpen(PChar(FPath));
-        try
-          if unzLocateFile(ZipFile, PChar(Path), 2) = UNZ_OK then Exit(Path);
-        finally
-          unzClose(ZipFile);
-        end;
-      end;
-    end;
+procedure TMangaBookHelper.ReadFromMetaFile(AReader: TReader; JSONData: TJSONData; Details: TMangaBook.PDetails);
+
+  function GetAnyFile(AReader: TReader; Paths: TStringArray): string;
+  var
+    Path: string;
+  begin
+    for Path in Paths do if AReader.FileExists(Path) then Exit(Path);
+    Result := EmptyStr;
   end;
-  Result := EmptyStr;
-end;
 
-procedure TMangaBookReader.FindVolumes(VolumeList: TVolumeList);
-begin
-  case FPackageType of
-    mptDirectory: FVolumes := FindVolumesFromDirectory(FPath, '', VolumeList);
-    mptZipped: FVolumes := FindVolumesFromZipFile(FPath, VolumeList);
-  end;
-end;
-
-procedure TMangaBookReader.ReadFromJSON(JSONData: TJSONData; Detail: TMangaBook.PDetail);
 var
   CoverFilenames: TStringArray = ('cover.png', 'cover.jpg', 'cover.jpeg');
 begin
@@ -524,11 +551,11 @@ begin
   begin
     FTitle := DefaultName;
     FVolumes := 0;
-    FCover := GetAnyFile(CoverFilenames);
+    FCover := GetAnyFile(AReader, CoverFilenames);
     Exit;
   end;
   FCover := JSONData.ReadString('cover');
-  if FCover = EmptyStr then FCover := GetAnyFile(CoverFilenames);
+  if FCover = EmptyStr then FCover := GetAnyFile(AReader, CoverFilenames);
   FTitle := JSONData.ReadString('name', DefaultName);
   FVolumes := JSONData.ReadUInt('volumes');
   FRegion := JSONData.ReadString('region');
@@ -539,77 +566,98 @@ begin
   TryISOStrToDate(JSONData.ReadString('originalRun[1]'), FOriginalRun[rrTo]);
   TryISOStrToDate(JSONData.ReadString('lastUpdated'), FLastUpdated);
   FSeriesState := ConvertToSeriesState(JSONData.ReadUInt('state'));
-  if Detail = nil then
+  if Details = nil then
   begin
     if FVolumes = 0 then FVolumes := JSONData.ReadArraySize('toc');
     Exit;
   end;
-  Detail^.Plot := JSONData.ReadString('plot');
-  Detail^.Source := JSONData.ReadString('source');
-  Detail^.Volumes := JSONData.ReadVolumeArray('toc');
-  if FVolumes = 0 then FVolumes := Length(Detail^.Volumes);
+  Details^.Plot := JSONData.ReadString('plot');
+  Details^.Source := JSONData.ReadString('source');
+  Details^.Volumes := JSONData.ReadVolumeArray('toc');
+  if FVolumes = 0 then FVolumes := Length(Details^.Volumes);
 end;
 
-procedure TMangaBookReader.Read;
+procedure TMangaBookHelper.Read;
 var
-  Stream: TStream;
+  AReader: TReader;
+begin
+  AReader := Reader;
+  try
+    Read(AReader);
+  finally
+    AReader.Free;
+  end;
+end;
+
+procedure TMangaBookHelper.Read(AReader: TReader);
+var
   Parser: TJSONParser;
 begin
-  if not OpenJSON(Stream, Parser) then
+  if not OpenMetaFile(AReader, Parser) then
+    FTitle := DefaultName
+  else
   begin
-    FTitle := DefaultName;
-    Exit;
+    try
+      ReadFromMetaFile(AReader, Parser.Parse, nil);
+    finally
+      Parser.Free;
+    end;
   end;
-  try
-    ReadFromJSON(Parser.Parse, nil);
-  finally
-    Parser.Free;
-    Stream.Free;
-  end;
-  if FVolumes = 0 then FindVolumes;
+  if FVolumes = 0 then FVolumes := AReader.Dir.VolumeCount;
 end;
 
-procedure TMangaBookReader.Read(out Detail: TMangaBook.TDetail);
+procedure TMangaBookHelper.Read(out Details: TMangaBook.TDetails);
 var
-  Stream: TStream;
+  AReader: TReader;
+begin
+  AReader := Reader;
+  try
+    Read(AReader, Details);
+  finally
+    AReader.Free;
+  end;
+end;
+
+procedure TMangaBookHelper.Read(AReader: TReader; out Details: TMangaBook.TDetails);
+var
   Parser: TJSONParser;
   VolumeList: TVolumeList;
 begin
-  if not OpenJSON(Stream, Parser) then
+  if not OpenMetaFile(AReader, Parser) then
+    FTitle := DefaultName
+  else
   begin
-    FTitle := DefaultName;
-    Exit;
-  end;
-  try
-    ReadFromJSON(Parser.Parse, @Detail);
-  finally
-    Parser.Free;
-    Stream.Free;
+    try
+      ReadFromMetaFile(AReader, Parser.Parse, @Details);
+    finally
+      Parser.Free;
+    end;
   end;
 
-  if (FVolumes = 0) or (Detail.Volumes = nil) then
+  if (FVolumes = 0) or (Details.Volumes = nil) then
   begin
     VolumeList := TVolumeList.Create;
     try
-      FindVolumes(VolumeList);
-      Detail.Volumes := VolumeList.ToArray;
+      FVolumes := AReader.Dir.FindVolumes(VolumeList);
+      Details.Volumes := VolumeList.ToArray;
     finally
       VolumeList.Free;
     end;
   end;
 end;
 
-procedure TMangaBookReader.Read(VolumePath: string; out PageArray: TMangaBook.TPageArray);
+{
+procedure TMangaBookHelper.Read(VolumePath: string; out PageArray: TMangaBook.TPageArray);
 begin
   case FPackageType of
-    mptDirectory: ReadVolumeFromDirectory(ConcatPaths([FPath, VolumePath]), PageArray);
-    mptZipped: ;
+    mptDir: ReadVolumeFromDirectory(ConcatPaths([FPath, VolumePath]), PageArray);
+    mptZip: ;
   else
     raise EArgumentOutOfRangeException.Create('Not implemented');
   end;
-end;
+end;}
 
-procedure TMangaBookReader.Read(FilePath: string; Picture: TPicture);
+{procedure TMangaBookHelper.Read(FilePath: string; Picture: TPicture);
 var
   Ext: string;
   Stream: TStream;
@@ -621,7 +669,7 @@ begin
   Delete(Ext, 1, 1);
 
   case FPackageType of
-    mptDirectory:
+    mptDir:
       begin
         try
           Stream := TFileStream.Create(ConcatPaths([FPath, FilePath]), fmOpenRead or fmShareDenyWrite);
@@ -629,7 +677,7 @@ begin
           Exit;
         end;
       end;
-    mptZipped:
+    mptZip:
       begin
         ZipFile := unzOpen(PChar(FPath));
         try
@@ -658,8 +706,105 @@ begin
   finally
     Stream.Free;
   end;
+end;}
+
+{ TReader }
+
+function TReader.GetDir: TVirtualDirectory;
+begin
+  if not FLoaded then
+  begin
+    LoadFiles;
+    FLoaded := True;
+  end;
+  Result := FVDir;
 end;
 
+constructor TReader.Create(Path: string);
+begin
+  FLoaded := False;
+  FPath := Path;
+  FVDir := TVirtualDirectory.Create;
+end;
+
+destructor TReader.Destroy;
+begin
+  FVDir.Free;
+  inherited Destroy;
+end;
+
+{ TDirReader }
+
+function TDirReader.GetFile(FilePath: string; out Stream: TStream): boolean;
+var
+  FileFullPath: string;
+begin
+  FileFullPath := ConcatPaths([FPath, FilePath]);
+  Result := SysUtils.FileExists(FileFullPath);
+  if Result then Stream := TFileStream.Create(FileFullPath, fmOpenRead or fmShareDenyWrite);
+end;
+
+function TDirReader.FileExists(FilePath: string): boolean;
+begin
+  Result := SysUtils.FileExists(ConcatPaths([FPath, FilePath]));
+end;
+
+procedure TDirReader.LoadFiles;
+begin
+  LoadFilesFromDir(FPath, '', FVDir);
+end;
+
+{ TZipReader }
+
+constructor TZipReader.Create(Path: string);
+begin
+  inherited;
+  FZipFile := unzOpen(PChar(Path));
+end;
+
+destructor TZipReader.Destroy;
+begin
+  unzClose(FZipFile);
+  inherited Destroy;
+end;
+
+function TZipReader.GetFile(FilePath: string; out Stream: TStream): boolean;
+var
+  UnzFileInfo: unz_file_info;
+  FileName: shortstring;
+begin
+  if (unzLocateFile(FZipFile, PChar(FilePath), 2) <> UNZ_OK) or
+     (unzGetCurrentFileInfo(FZipFile, @UnzFileInfo, @FileName[1], Sizeof(FileName) - 1, nil, 0, nil, 0) <> UNZ_OK) or
+     (unzOpenCurrentFile(FZipFile) <> UNZ_OK) then Exit(False);
+  try
+    Stream := TMemoryStream.Create;
+    Stream.Size := UnzFileInfo.uncompressed_size;
+    unzReadCurrentFile(FZipFile, TMemoryStream(Stream).Memory, Stream.Size);
+  finally
+    unzCloseCurrentFile(FZipFile);
+  end;
+  Result := True;
+end;
+
+function TZipReader.FileExists(FilePath: string): boolean;
+begin
+  Result := unzLocateFile(FZipFile, PChar(FilePath), 2) = UNZ_OK;
+end;
+
+procedure TZipReader.LoadFiles;
+var
+  UnzFileInfo: unz_file_info;
+  Filename: shortstring;
+begin
+  if unzGoToFirstFile(FZipFile) = UNZ_OK then
+  begin
+    repeat
+      unzGetCurrentFileInfo(FZipFile, @UnzFileInfo, @Filename[1], Sizeof(Filename) - 1, nil, 0, nil, 0);
+      Filename[0] := Char(UnzFileInfo.size_filename);
+      FVDir.AddFile(WinCPToUTF8(Filename));
+    until unzGoToNextFile(FZipFile) <> UNZ_OK;
+  end;
+end;
 
 end.
 

@@ -35,7 +35,7 @@ type
     TRunRange = (rrFrom, rrTo);
     TOriginalRun = array[TRunRange] of TDateTime;
     TSeriesState = (ssUnknown, ssCompleted, ssOngoing);
-    TPackageType = (mptDirectory, mptZipped);
+    TPackageType = (mptDir, mptZip, mptTar, mptRar, mptEPub);
 
     TPage = record
       Name: string;
@@ -50,13 +50,13 @@ type
     PVolume = ^TVolume;
     TVolumeArray = array of TVolume;
 
-    TDetail = record
+    TDetails = record
       Plot: string;
       Source: string;
       Volumes: TVolumeArray;
     end;
 
-    PDetail = ^TDetail;
+    PDetails = ^TDetails;
   protected
     FPackageType: TPackageType;
     FPath: string;
@@ -109,7 +109,7 @@ type
   TMangaManager = class
   type
     TLoadBooksWork = specialize TWork<TMangaBooks>;
-    TReadBookWork = specialize TWork<TMangaBook.TDetail>;
+    TReadBookWork = specialize TWork<TMangaBook.TDetails>;
     TReadVolumeWork = specialize TWork<TMangaBook.TPageArray>;
   private
     FBooks: TMangaBooks;
@@ -269,9 +269,9 @@ end;
 
 procedure TMangaManager.ReadBook(Book: TMangaBook; OnSuccess: TReadBookWork.TOnSuccess; OnFailure: TReadBookWork.TOnFailure);
 var
-  Reader: TMangaDetailReader;
+  Reader: TMangaDetailsLoader;
 begin
-  Reader := TMangaDetailReader.Create(Book);
+  Reader := TMangaDetailsLoader.Create(Book);
   Reader.OnSuccess := OnSuccess;
   Reader.OnFailure := OnFailure;
   WorkPool.Exec(Reader);
@@ -280,9 +280,9 @@ end;
 procedure TMangaManager.ReadVolume(Book: TMangaBook; var Volume: TMangaBook.TVolume; OnSuccess: TReadVolumeWork.TOnSuccess;
   OnFailure: TReadVolumeWork.TOnFailure);
 var
-  Reader: TMangaVolumeReader;
+  Reader: TMangaVolumeLoader;
 begin
-  Reader := TMangaVolumeReader.Create(Book, @Volume);
+  Reader := TMangaVolumeLoader.Create(Book, @Volume);
   Reader.OnSuccess := OnSuccess;
   Reader.OnFailure := OnFailure;
   WorkPool.Exec(Reader);

@@ -216,6 +216,7 @@ var
   Button: Pointer;
   BookCoverResolutions: TMangaBookCoverManager.TResolutions;
   BookCoverDefaults: TMangaBookCoverManager.TIconTuple;
+  DefaultSmallCover, DefaultLargeCover: TPicture;
 begin
   inherited;
   FToolBarButtonsWidth := ToolBar.ButtonCount + 26;
@@ -234,14 +235,25 @@ begin
     Load;
   end;
 
-  BookCoverResolutions[birtSmall].Height := ICON_SMALL_HEIGHT;
-  BookCoverResolutions[birtSmall].Width := ICON_SMALL_WIDTH; 
-  BookCoverResolutions[birtLarge].Height := ICON_LARGE_HEIGHT;
-  BookCoverResolutions[birtLarge].Width := ICON_LARGE_WIDTH;
-  BookCoverDefaults[birtSmall] := TPicture.Create;
-  BookCoverDefaults[birtSmall].LoadFromResourceName(HInstance, 'NO_COVER_SMALL');
-  BookCoverDefaults[birtLarge] := TPicture.Create; 
-  BookCoverDefaults[birtLarge].LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
+  with BookCoverResolutions[birtSmall] do
+  begin
+    Height := ICON_SMALL_HEIGHT;
+    Width := ICON_SMALL_WIDTH;
+  end;
+  with BookCoverResolutions[birtLarge] do
+  begin
+    Height := ICON_LARGE_HEIGHT;
+    Width := ICON_LARGE_WIDTH;
+  end;
+
+  DefaultSmallCover := TPicture.Create;
+  DefaultSmallCover.LoadFromResourceName(HInstance, 'NO_COVER_SMALL');
+  BookCoverDefaults[birtSmall] := DefaultSmallCover;
+
+  DefaultLargeCover := TPicture.Create;
+  DefaultLargeCover.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
+  BookCoverDefaults[birtLarge] := DefaultLargeCover;
+
   FBookCoverManager := TMangaBookCoverManager.Create(ListView, BookCoverResolutions, BookCoverDefaults, Self);
   FOpenedBooks := TFormList.Create;
 end;
@@ -341,12 +353,11 @@ end;
 
 function TPageBookshelf.BuildIconLoader(Indexes: TMangaBookCoverManager.TIndexArray): TMangaBookCoverManager.TLoadIconsWork;
 var
-  IndexBookPairArray: TMangaBookCoverLoader.TIndexBookPairArray;
+  IndexBookPairArray: TMangaCoverLoader.TIndexBookPairArray = ();
   Size: SizeInt;
   i, Index: Integer;
 begin
   Size := Length(Indexes);
-  IndexBookPairArray := [];
   SetLength(IndexBookPairArray, Size);
   for i := 0 to Length(Indexes) - 1 do
   begin
@@ -354,7 +365,7 @@ begin
     IndexBookPairArray[i].Key := Index;
     IndexBookPairArray[i].Value := MangaManager.Books[Index];
   end;
-  Result := TMangaBookCoverLoader.Create(IndexBookPairArray);
+  Result := TMangaCoverLoader.Create(FBookCoverManager, IndexBookPairArray);
 end;
 
 procedure TPageBookshelf.ActionRefreshExecute(Sender: TObject);

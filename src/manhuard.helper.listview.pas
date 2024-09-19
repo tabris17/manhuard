@@ -52,6 +52,7 @@ type
       HAlign: THorizontalAlign = haLeft; VAlign: TVerticalAlign = vaTop);
     procedure Load(Data: PtrInt);
     procedure LoadSuccess(Sender: TLoadIconsWork; Return: TIndexIconPairArray);
+    property Resolutions: TResolutions read FResolutions;
   end;
 
 implementation

@@ -21,36 +21,45 @@ type
     function Execute: TMangaBooks; override;
   end;
 
-const
-  MANGA_BOOK_FILE_EXT = '.mhs';
-  BOOK_JSON_FILE_NAME = 'book.json';
 
 implementation
 
 uses LazFileUtils, LazUTF8, Manhuard.Config, Manhuard.Manga.Reader;
 
-function IsMangaDirectory(Path: string): boolean; inline;
-begin
-  Result := FileExists(ConcatPaths([Path, BOOK_JSON_FILE_NAME]));
-end;
-
-function IsMangaFile(Path: string): boolean; inline;
-begin
-  Result := ExtractFileExt(Path) = MANGA_BOOK_FILE_EXT;
-end;
-
 { TMangaLoader }
 
 procedure TMangaLoader.ScanDir(Path: string);
- function LoadBook(MangaPath: string; PackageType: TMangaBook.TPackageType): TMangaBook;
- begin
-   Result := TMangaBook.Create(MangaPath, PackageType);
-   Result.Read;
- end;
+
+  function IsMangaDirectory(Path: string): boolean; inline;
+  begin
+    Result := FileExists(ConcatPaths([Path, MANGA_BOOK_JSON_FILE_NAME]));
+  end;
+
+  function IsMangaFile(Path: string; out PackageType: TMangaBook.TPackageType): boolean; inline;
+  var
+    i: TMangaBook.TPackageType;
+  begin
+    for i := Low(MANGA_PACKAGE_TYPES) to High(MANGA_PACKAGE_TYPES) do
+    begin
+      if ExtractFileExt(Path) = MANGA_PACKAGE_TYPES[i] then
+      begin
+        PackageType := i;
+        Exit(True);
+      end;
+    end;
+    Result := False;
+  end;
+
+  function LoadBook(MangaPath: string; PackageType: TMangaBook.TPackageType): TMangaBook;
+  begin
+    Result := TMangaBook.Create(MangaPath, PackageType);
+    Result.Read;
+  end;
 
 var
   SearchRec: TSearchRec;
   SubPath: string;
+  PackageType: TMangaBook.TPackageType;
 begin
   if FindFirst(ConcatPaths([Path, '*']), faAnyFile, SearchRec) = 0 then
   begin
@@ -61,12 +70,12 @@ begin
         begin
           if (SearchRec.Name = '.') or (SearchRec.Name = '..') then continue;
           if IsMangaDirectory(SubPath) then
-            FBooks.Add(LoadBook(SubPath, mptDirectory))
+            FBooks.Add(LoadBook(SubPath, mptDir))
           else
             ScanDir(SubPath);
         end
-        else if IsMangaFile(SubPath) then
-          FBooks.Add(LoadBook(SubPath, mptZipped));
+        else if IsMangaFile(SubPath, PackageType) then
+          FBooks.Add(LoadBook(SubPath, PackageType));
       until FindNext(SearchRec) <> 0;
       if Canceling then Cancel;
     finally

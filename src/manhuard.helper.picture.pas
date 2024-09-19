@@ -10,7 +10,14 @@ uses
 type
   EPictureError = Exception;
 
-procedure ResizePicture(Picture: TPicture; NewWidth, NewHeight: Integer);
+  { TPictureHelper }
+
+  TPictureHelper = class helper for TPicture
+  public
+    procedure Resize(Width, Height: Integer);
+    procedure LoadFromStream(Stream: TStream);
+  end;
+
 
 implementation
 
@@ -49,38 +56,44 @@ const
   FILE_EXT = 'PNG';
 var
   Size: size_t;
-  ImageBlob: PByte;
-  ImageBytes: TBytes;
+  Blob: PByte;
   Status: MagickBooleanType;
-  Stream: TBytesStream;
+  Stream: TMemoryStream;
 begin
   Status := MagickSetImageFormat(Wand, FILE_EXT);
   if Status = MagickFalse then ThrowWandException(Wand);
-  ImageBlob := MagickGetImageBlob(Wand, @Size);
-  SetLength(ImageBytes, Size);
-  Move(ImageBlob^, ImageBytes[0], Size);
-  Stream := TBytesStream.Create(ImageBytes);
+  Blob := MagickGetImageBlob(Wand, @Size);
+  Stream := TMemoryStream.Create;
   try
+    Stream.Size := Size;
+    Move(Blob^, Stream.Memory^, Size);
     Picture.LoadFromStreamWithFileExt(Stream, FILE_EXT);
   finally
     Stream.Free;
   end;
 end;
 
-procedure ResizePicture(Picture: TPicture; NewWidth, NewHeight: Integer);
+{ TPictureHelper }
+
+procedure TPictureHelper.Resize(Width, Height: Integer);
 var
-  Wand: PMagickWand; 
+  Wand: PMagickWand;
   Status: MagickBooleanType;
 begin
   Wand := NewMagickWand;
   try
-    LoadFromPicture(Wand, Picture);
-    Status := MagickResizeImage(Wand, NewWidth, NewHeight, LanczosFilter, 1.0);
+    LoadFromPicture(Wand, Self);
+    Status := MagickResizeImage(Wand, Width, Height, LanczosFilter, 1.0);
     if Status = MagickFalse then ThrowWandException(Wand);
-    SaveToPicture(Wand, Picture);
+    SaveToPicture(Wand, Self);
   finally
     Wand := DestroyMagickWand(Wand);
   end;
+end;
+
+procedure TPictureHelper.LoadFromStream(Stream: TStream);
+begin
+  inherited;
 end;
 
 initialization
