@@ -4,8 +4,8 @@ inherited PageBookshelf: TPageBookshelf
   ClientHeight = 445
   ClientWidth = 769
   OnResize = FrameResize
-  DesignLeft = 342
-  DesignTop = 135
+  DesignLeft = 565
+  DesignTop = 139
   object ListView: TListView[0]
     Left = 0
     Height = 413

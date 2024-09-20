@@ -1,6 +1,0 @@
-{"version":1,"strings":[
-{"hash":191236306,"name":"tformmain.toolbar.caption","sourcebytes":[84,111,111,108,66,97,114],"value":"ToolBar"},
-{"hash":2805797,"name":"tformmain.menuitemfile.caption","sourcebytes":[38,70,105,108,101],"value":"&File"},
-{"hash":4710148,"name":"tformmain.menuitemexit.caption","sourcebytes":[69,38,120,105,116],"value":"E&xit"},
-{"hash":2844350,"name":"tformmain.actionopen.caption","sourcebytes":[38,79,112,101,110],"value":"&Open"}
-]}
