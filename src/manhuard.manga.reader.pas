@@ -88,6 +88,7 @@ type
     function ReadFile(FilePath: string; out Stream: TStream): boolean; virtual; abstract;
     function FileExists(FilePath: string): boolean; virtual; abstract;
     function VolumeCount: Integer;
+    function FindCoverFile: string;
   public
     constructor Create(APath: string);
     destructor Destroy; override;
@@ -142,9 +143,11 @@ type
 
   TMangaBookHelper = class helper for TMangaBook
   private
+    function GetCover: TPicture;
     function GetReader: TReader;
   public
     property Reader: TReader read GetReader;
+    property Cover: TPicture read GetCover;
     procedure Read;
     procedure Read(AReader: TReader);
     procedure Read(out Details: TMangaBook.TDetails);
@@ -330,6 +333,23 @@ begin
   Result := FVDir.LeafNodeCount;
 end;
 
+function TGeneralReader.FindCoverFile: string;
+var
+  Parser: TJSONParser;
+begin
+  if ReadJSON(Parser) then
+  begin
+    try
+      Result := Parser.Parse.ReadString('cover');
+      if Result <> EmptyStr then Exit;
+    finally
+      Parser.Free;
+    end;
+  end;
+  for Result in ['cover.png', 'cover.jpg'] do if FileExists(Result) then Exit;
+  Result := EmptyStr;
+end;
+
 constructor TGeneralReader.Create(APath: string);
 begin
   inherited Create(APath);
@@ -344,8 +364,23 @@ begin
 end;
 
 function TGeneralReader.GetCover(Cover: TPicture): boolean;
+var
+  CoverFile: String;
+  Stream: TStream;
 begin
-
+  CoverFile := FindCoverFile;
+  if CoverFile = EmptyStr then Exit(False);
+  if not ReadFile(CoverFile, Stream) then Exit(False);
+  try
+    try
+      Cover.Load(Stream);
+    except
+      on E: EPictureError do Exit(False);
+    end;
+  finally
+    Stream.Free;
+  end;
+  Result := True;
 end;
 
 function TGeneralReader.Read(MangaBook: TMangaBook; Details: TMangaBook.PDetails): boolean;
@@ -590,6 +625,19 @@ begin
 end;
 
 { TMangaBookHelper }
+
+function TMangaBookHelper.GetCover: TPicture;
+var
+  AReader: TReader;
+begin
+  AReader := Reader;
+  try
+    Result := TPicture.Create;
+    if not AReader.GetCover(Result) then FreeAndNil(Result);
+  finally
+    AReader.Free;
+  end;
+end;
 
 function TMangaBookHelper.GetReader: TReader;
 begin

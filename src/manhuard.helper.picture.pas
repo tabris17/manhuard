@@ -15,7 +15,7 @@ type
   TPictureHelper = class helper for TPicture
   public
     procedure Resize(Width, Height: Integer);
-    procedure LoadFromStream(Stream: TStream);
+    procedure Load(Stream: TStream);
   end;
 
 
@@ -91,9 +91,37 @@ begin
   end;
 end;
 
-procedure TPictureHelper.LoadFromStream(Stream: TStream);
+procedure TPictureHelper.Load(Stream: TStream);
+var
+  Wand: PMagickWand;
+  MemoryStream: TMemoryStream;
+  Status: MagickBooleanType;
 begin
-  inherited;
+  try
+    LoadFromStream(Stream);
+    Exit;
+  except
+    on E: EInvalidGraphic do;
+  end;
+  Wand := NewMagickWand;
+  try
+    if Stream is TMemoryStream then
+      Status := MagickReadImageBlob(Wand, (Stream as TMemoryStream).Memory, Stream.Size)
+    else
+    begin
+      MemoryStream := TMemoryStream.Create;
+      try
+        MemoryStream.LoadFromStream(Stream);
+        Status := MagickReadImageBlob(Wand, MemoryStream.Memory, Stream.Size);
+      finally
+        MemoryStream.Free;
+      end;
+    end;
+    if Status = MagickFalse then ThrowWandException(Wand);
+    SaveToPicture(Wand, Self);
+  finally
+    Wand := DestroyMagickWand(Wand);
+  end;
 end;
 
 initialization
