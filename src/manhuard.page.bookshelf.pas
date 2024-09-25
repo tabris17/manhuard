@@ -15,7 +15,7 @@ type
 
   { TPageBookshelf }
 
-  TPageBookshelf = class(TStatefulPage, TMangaBookCoverManager.IIconLoaderFactroy)
+  TPageBookshelf = class(TStatefulPage)
     ActionOpenInNewWindow: TAction;
     ActionRefresh: TAction;
     ActionFilter: TAction;
@@ -73,7 +73,7 @@ type
     procedure MangaLoaded(Event: TMangaEvent);
   private
     FToolBarButtonsWidth: Integer;
-    FBookCoverManager: TMangaBookCoverManager;
+    //FBookCoverManager: TMangaBookCoverManager;
     FOpenedBooks: TFormList;
   protected
     procedure VisibleChanged; override;
@@ -82,7 +82,6 @@ type
     procedure Initialize; override;
     procedure Finalize; override;
     procedure FormBookClose(Sender: TObject; var CloseAction: TCloseAction);
-    function BuildIconLoader(Indexes: TMangaBookCoverManager.TIndexArray): TMangaBookCoverManager.TLoadIconsWork;
   end;
 
 
@@ -121,11 +120,11 @@ procedure TPageBookshelf.ListViewCustomDrawItem(Sender: TCustomListView; Item: T
   var DefaultDraw: Boolean);
 begin
   if State = [] then Exit;
-  case ListView.ViewStyle of
+  {case ListView.ViewStyle of
     vsIcon: FBookCoverManager.DrawIcon(Item, birtLarge, haCenter, vaBottom);
     vsSmallIcon: FBookCoverManager.DrawIcon(Item, birtSmall);
     vsReport: FBookCoverManager.DrawIcon(Item, birtSmall);
-  end;
+  end;}
 end;
 
 procedure TPageBookshelf.ListViewData(Sender: TObject; Item: TListItem);
@@ -139,7 +138,7 @@ begin
     Item.Caption := Format(LV_SHORT_CAPTION, [Book.Title, Writers])
   else
   begin
-    Item.Caption := Book.Title;
+    Item.Caption := Book.Caption;
     Item.SubItems.Add(specialize IfThen<string>(Book.Volumes > 0, IntToStr(Book.Volumes), EmptyStr));
     Item.SubItems.Add(Writers);
     Item.SubItems.Add(specialize IfThen<string>(Book.ReleaseYear > 0, IntToStr(Book.ReleaseYear), EmptyStr));
@@ -214,11 +213,14 @@ end;
 procedure TPageBookshelf.Initialize;
 var
   Button: Pointer;
-  BookCoverResolutions: TMangaBookCoverManager.TResolutions;
-  BookCoverDefaults: TMangaBookCoverManager.TIconTuple;
-  DefaultSmallCover, DefaultLargeCover: TPicture;
+  //BookCoverResolutions: TMangaBookCoverManager.TResolutions;
+  //BookCoverDefaults: TMangaBookCoverManager.TIconTuple;
+  //DefaultSmallCover, DefaultLargeCover: TPicture;
 begin
   inherited;
+
+  FOpenedBooks := TFormList.Create;
+
   FToolBarButtonsWidth := ToolBar.ButtonCount + 26;
   for Button in ToolBar.ButtonList do Inc(FToolBarButtonsWidth, TToolButton(Button).Width);
 
@@ -235,7 +237,7 @@ begin
     Load;
   end;
 
-  with BookCoverResolutions[birtSmall] do
+  {with BookCoverResolutions[birtSmall] do
   begin
     Height := ICON_SMALL_HEIGHT;
     Width := ICON_SMALL_WIDTH;
@@ -254,8 +256,7 @@ begin
   DefaultLargeCover.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
   BookCoverDefaults[birtLarge] := DefaultLargeCover;
 
-  FBookCoverManager := TMangaBookCoverManager.Create(ListView, BookCoverResolutions, BookCoverDefaults, Self);
-  FOpenedBooks := TFormList.Create;
+  FBookCoverManager := TMangaBookCoverManager.Create(ListView, BookCoverResolutions, BookCoverDefaults, Self);}
 end;
 
 procedure TPageBookshelf.Finalize;
@@ -268,7 +269,7 @@ begin
     RemoveEventListener(etLoaded, @MangaLoaded);
   end;
 
-  FBookCoverManager.Free;
+  //FBookCoverManager.Free;
   FOpenedBooks.Free;
   inherited;
 end;
@@ -351,7 +352,7 @@ begin
   if FOpenedBooks.Count = 0 then MenuItemEmpty.Visible := True;
 end;
 
-function TPageBookshelf.BuildIconLoader(Indexes: TMangaBookCoverManager.TIndexArray): TMangaBookCoverManager.TLoadIconsWork;
+{function TPageBookshelf.BuildIconLoader(Indexes: TMangaBookCoverManager.TIndexArray): TMangaBookCoverManager.TLoadIconsWork;
 var
   IndexBookPairArray: TMangaCoverLoader.TIndexBookPairArray = ();
   Size: SizeInt;
@@ -366,7 +367,7 @@ begin
     IndexBookPairArray[i].Value := MangaManager.Books[Index];
   end;
   Result := TMangaCoverLoader.Create(FBookCoverManager, IndexBookPairArray);
-end;
+end;}
 
 procedure TPageBookshelf.ActionRefreshExecute(Sender: TObject);
 begin

@@ -170,7 +170,7 @@ begin
 
   if Node.Parent = nil then
   begin
-    StatusBar.Panels[0].Text := FBook.Title;
+    StatusBar.Panels[0].Text := FBook.Caption;
     StatusBar.Panels[1].Text := EmptyStr;
     CoverBox.Visible := True;
     PageListView.Visible := False;
@@ -200,20 +200,8 @@ end;
 procedure TFrameBook.SetBook(AValue: TMangaBook);
 begin
   FBook := AValue;
-  LabelTitle.Caption := FBook.Title;
-  LabelWriter.Caption := WRITTEN_BY + string.Join(', ', Book.Writers);
-  case FBook.SeriesState of
-    ssUnknown: SetLabel(LabelStateText, LabelState, NOT_ACCESS);
-    ssCompleted: SetLabel(LabelStateText, LabelState, STATE_COMPLETED);
-    ssOngoing: SetLabel(LabelStateText, LabelState, STATE_ONGOING);
-  end;
-  SetLabel(LabelRegionText, LabelRegion, FBook.Region);
-  SetLabel(LabelYearText, LabelYear, FBook.ReleaseYear);
-  SetLabel(LabelGenreText, LabelGenre, string.Join(', ', FBook.Genre));
-  SetLabel(LabelLastUpdatedText, LabelLastUpdated, FBook.LastUpdated);
-  SetLabel(LabelOriginalRunText, LabelOriginalRun, FBook.OriginalRun);
+  LabelTitle.Caption := FBook.Caption;
   Busy := True;
-  FrameResize(Self);
   MangaManager.ReadBook(FBook, @ReadSuccess, @ReadFailure);
 end;
 
@@ -239,7 +227,19 @@ end;
 
 procedure TFrameBook.ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetails);
 begin
+  Busy := False;
   FDetail := Return;
+  LabelWriter.Caption := WRITTEN_BY + string.Join(', ', Book.Writers);
+  case FBook.SeriesState of
+    ssUnknown: SetLabel(LabelStateText, LabelState, NOT_ACCESS);
+    ssCompleted: SetLabel(LabelStateText, LabelState, STATE_COMPLETED);
+    ssOngoing: SetLabel(LabelStateText, LabelState, STATE_ONGOING);
+  end;
+  SetLabel(LabelRegionText, LabelRegion, FBook.Region);
+  SetLabel(LabelYearText, LabelYear, FBook.ReleaseYear);
+  SetLabel(LabelGenreText, LabelGenre, string.Join(', ', FBook.Genre));
+  SetLabel(LabelLastUpdatedText, LabelLastUpdated, FBook.LastUpdated);
+  SetLabel(LabelOriginalRunText, LabelOriginalRun, FBook.OriginalRun);
   if Return.Source = EmptyStr then
   begin
     LabelTitle.Font.Color := clDefault;
@@ -256,7 +256,7 @@ begin
   end;
   LabelPlot.Caption := Return.Plot;
   SetTableOfContents;
-  Busy := False;
+  FrameResize(Self);
 end;
 
 procedure TFrameBook.ReadFailure(Sender: TMangaManager.TReadBookWork; Error: TMangaManager.TReadBookWork.TError);
@@ -343,7 +343,7 @@ var
   i: Integer;
 begin
   TableOfContents.Items.Clear;
-  RootNode := TableOfContents.Items.AddChild(nil, FBook.Title);
+  RootNode := TableOfContents.Items.AddChild(nil, FBook.Caption);
   for i := 0 to Length(FDetail.Volumes) - 1 do
   begin
     Path := FDetail.Volumes[i].Path.Trim(DirectorySeparators);

@@ -33,7 +33,7 @@ procedure TPageBook.SetBook(AValue: TMangaBook);
 begin
   if FBook = AValue then Exit;
   FBook := AValue;
-  LabelTitle.Caption := FBook.Title;
+  LabelTitle.Caption := FBook.Caption;
   FrameBookInPage.Book := FBook;
 end;
 

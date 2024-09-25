@@ -57,10 +57,16 @@ type
     end;
 
     PDetails = ^TDetails;
+  private
+    function GetCaption: string;
+    function GetName: string;
+    function GetOriginalRunFrom: TDateTime;
+    function GetOriginalRunTo: TDateTime;
+    procedure SetOriginalRunFrom(AValue: TDateTime);
+    procedure SetOriginalRunTo(AValue: TDateTime);
   protected
     FPackageType: TPackageType;
     FPath: string;
-    FCover: string;
     FTitle: string;
     FWriters: TStringArray;
     FVolumes: Integer;
@@ -76,17 +82,20 @@ type
     destructor Destroy; override;
     property PackageType: TPackageType read FPackageType;
     property Path: string read FPath;
-    property Cover: string read FCover;
-    property Title: string read FTitle;
-    property Writers: TStringArray read FWriters;
-    property Volumes: Integer read FVolumes;
-    property Chapters: Integer read FChapters;
-    property ReleaseYear: TYear read FReleaseYear; 
-    property OriginalRun: TOriginalRun read FOriginalRun;
-    property Region: string read FRegion;
-    property Genre: TStringArray read FGenre;
-    property LastUpdated: TDatetime read FLastUpdated;
-    property SeriesState: TSeriesState read FSeriesState;
+    property Caption: string read GetCaption;
+    property Name: string read GetName;
+    property Title: string read FTitle write FTitle;
+    property Writers: TStringArray read FWriters write FWriters;
+    property Volumes: Integer read FVolumes write FVolumes;
+    property Chapters: Integer read FChapters write FChapters;
+    property ReleaseYear: TYear read FReleaseYear write FReleaseYear;
+    property OriginalRun: TOriginalRun read FOriginalRun write FOriginalRun;
+    property OriginalRunFrom: TDateTime read GetOriginalRunFrom write SetOriginalRunFrom;
+    property OriginalRunTo: TDateTime read GetOriginalRunTo write SetOriginalRunTo;
+    property Region: string read FRegion write FRegion;
+    property Genre: TStringArray read FGenre write FGenre;
+    property LastUpdated: TDatetime read FLastUpdated write FLastUpdated;
+    property SeriesState: TSeriesState read FSeriesState write FSeriesState;
   end;
 
   { TMangaBooks }
@@ -136,7 +145,7 @@ var
 
 implementation
 
-uses Manhuard.Manga.Loader, Manhuard.Manga.Reader;
+uses LazFileUtils, Manhuard.Manga.Loader, Manhuard.Manga.Reader;
 
 procedure TriggerEvent(Sender: TMangaManager; EventType: TMangaEvent.TEventType);
 var
@@ -155,6 +164,36 @@ begin
 end;
 
 { TMangaBook }
+
+function TMangaBook.GetCaption: string;
+begin
+  Result := specialize IfThen<string>(Title = EmptyStr, Name, Title);
+end;
+
+function TMangaBook.GetName: string;
+begin
+  Result := specialize IfThen<string>(FPackageType <> mptDir, ExtractFileNameOnly(FPath), ExtractFilename(FPath));
+end;
+
+function TMangaBook.GetOriginalRunFrom: TDateTime;
+begin
+  Result := FOriginalRun[rrFrom];
+end;
+
+function TMangaBook.GetOriginalRunTo: TDateTime;
+begin
+  Result := FOriginalRun[rrTo];
+end;
+
+procedure TMangaBook.SetOriginalRunFrom(AValue: TDateTime);
+begin
+  FOriginalRun[rrFrom] := AValue;
+end;
+
+procedure TMangaBook.SetOriginalRunTo(AValue: TDateTime);
+begin
+  FOriginalRun[rrTo] := AValue;
+end;
 
 constructor TMangaBook.Create(MangaPath: string; PackageType: TPackageType);
 begin
@@ -279,13 +318,13 @@ end;
 
 procedure TMangaManager.ReadVolume(Book: TMangaBook; var Volume: TMangaBook.TVolume; OnSuccess: TReadVolumeWork.TOnSuccess;
   OnFailure: TReadVolumeWork.TOnFailure);
-var
-  Reader: TMangaVolumeLoader;
+//var
+  //Reader: TMangaVolumeLoader;
 begin
-  Reader := TMangaVolumeLoader.Create(Book, @Volume);
+  {Reader := TMangaVolumeLoader.Create(Book, @Volume);
   Reader.OnSuccess := OnSuccess;
   Reader.OnFailure := OnFailure;
-  WorkPool.Exec(Reader);
+  WorkPool.Exec(Reader);}
 end;
 
 

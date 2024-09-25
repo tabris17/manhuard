@@ -39,9 +39,9 @@ procedure TMangaLoader.ScanDir(Path: string);
   var
     i: TMangaBook.TPackageType;
   begin
-    for i := Low(MANGA_PACKAGE_TYPES) to High(MANGA_PACKAGE_TYPES) do
+    for i := Low(MANGA_PACKAGE_FILE_EXTS) to High(MANGA_PACKAGE_FILE_EXTS) do
     begin
-      if ExtractFileExt(Path) = MANGA_PACKAGE_TYPES[i] then
+      if ExtractFileExt(Path) = MANGA_PACKAGE_FILE_EXTS[i] then
       begin
         PackageType := i;
         Exit(True);

@@ -29,6 +29,7 @@ object FormBook: TFormBook
       ClientHeight = 554
       ClientWidth = 650
       ParentBackground = False
+      Visible = True
     end
     inherited PageListView: TListView
       Height = 575
