@@ -5,10 +5,20 @@ unit Manhuard.Frame.Book;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls,
-  Manhuard.Manga;
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
+  Manhuard.Manga, Manhuard.Helper.ListView;
 
 type
+
+  { TPageLoader }
+
+  TPageLoader = class (TListViewIconManager.TLoadIconsWork)
+  protected
+    FDataArray: TListViewIconManager.TDataArray;
+  public
+    constructor Create(DataArray: TListViewIconManager.TDataArray);
+    function Execute: TListViewIconManager.TDataIconPairArray; override;
+  end;
 
   { TFrameBook }
 
@@ -52,9 +62,12 @@ type
     procedure PageListViewData(Sender: TObject; Item: TListItem);
     procedure SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure TableOfContentsSelectionChanged(Sender: TObject);
+    procedure ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
   private
     FBook: TMangaBook;
     FDetail: TMangaBook.TDetails;
+    FIconManager: TListViewIconManager;
+    FDefaultIcon: TPicture;
     FBusy: boolean;
     FSelectedVolume: TMangaBook.PVolume;
     FSelectedVolumePages: TMangaBook.TPageArray;
@@ -94,14 +107,42 @@ implementation
 
 {$R *.lfm}
 
-uses Graphics, Dialogs, LCLIntf, Manhuard.Manga.Reader;
+uses Dialogs, LCLIntf, Manhuard.Manga.Reader;
+
+{ TPageLoader }
+
+constructor TPageLoader.Create(DataArray: TListViewIconManager.TDataArray);
+begin
+  FDataArray := DataArray;
+end;
+
+function TPageLoader.Execute: TListViewIconManager.TDataIconPairArray;
+{var
+  Size: SizeInt;
+  Book: TMangaBook;
+  i: Integer;}
+begin
+{  Size := Length(FDataArray);
+  Result := [];
+  SetLength(Result, Size);
+  for i := 0 to Size -1 do
+  begin
+    Book := TMangaBook(FDataArray[i]);
+    with Result[i] do
+    begin
+      Key := Book;
+      Value := Book.Cover;
+    end;
+  end;}
+end;
 
 { TFrameBook }
 
 procedure TFrameBook.PageListViewCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState;
   var DefaultDraw: Boolean);
 begin
-
+  if State = [] then Exit;
+  FIconManager.DrawIcon(Item, haCenter, vaBottom);
 end;
 
 procedure TFrameBook.FrameResize(Sender: TObject);
@@ -193,8 +234,13 @@ begin
     PageListView.Cursor := crAppStart;
     FSelectedVolume := Volume;
     FSelectedVolumePages := nil;
-    MangaManager.ReadVolume(FBook, Volume^, @ReadVolumeSuccess, @ReadVolumeFailure);
+    MangaManager.ReadVolume(FBook, Volume^.Path, @ReadVolumeSuccess, @ReadVolumeFailure);
   end;
+end;
+
+procedure TFrameBook.ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
+begin
+  LoadIconWork := TPageLoader.Create(Sender.PendingData);
 end;
 
 procedure TFrameBook.SetBook(AValue: TMangaBook);
@@ -374,11 +420,16 @@ end;
 procedure TFrameBook.Initialize;
 begin
   FBusy := False;
+  FDefaultIcon := TPicture.Create;
+  FDefaultIcon.LoadFromResourceName(HInstance, 'NO_IMAGE');
+  FIconManager := TListViewIconManager.Create(PageListView);
+  FIconManager.DefaultIcon := FDefaultIcon;
 end;
 
 procedure TFrameBook.Finalize;
 begin
-
+  FIconManager.Free;
+  FDefaultIcon.Free;
 end;
 
 

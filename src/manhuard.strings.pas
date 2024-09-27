@@ -12,6 +12,7 @@ resourcestring
     'In some regions, you know, the proxy is necessary to access these websites.';
 
   MSG_CONFIG_SAVE_ERROR = 'Failed to save config file: "%s".';
+  MSG_FAILED_TO_READ_VOLUME = 'Failed to read volume by path "%s"';
 
 const
   INTERNAL_NAME = 'manhuard';

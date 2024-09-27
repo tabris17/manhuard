@@ -14,6 +14,8 @@ const
 
 type
 
+  EMangaReaderError = class(Exception);
+
   TVolumeList = specialize TList<TMangaBook.TVolume>;
   TPageList = specialize TList<TMangaBook.TPage>;
 
@@ -80,6 +82,7 @@ type
   private
     FVDir: TVirtualDirectory;
     FScanned: boolean;
+    function GetVDir: TVirtualDirectory;
   protected
     procedure AddFile(FilePath: string; Size: Int64);
     procedure ParseJSON(JSONData: TJSONData; MangaBook: TMangaBook; Details: TMangaBook.PDetails);
@@ -89,6 +92,7 @@ type
     function FileExists(FilePath: string): boolean; virtual; abstract;
     function VolumeCount: Integer;
     function FindCoverFile: string;
+    property VDir: TVirtualDirectory read GetVDir;
   public
     constructor Create(APath: string);
     destructor Destroy; override;
@@ -152,6 +156,8 @@ type
     procedure Read(AReader: TReader);
     procedure Read(out Details: TMangaBook.TDetails);
     procedure Read(AReader: TReader; out Details: TMangaBook.TDetails);
+    function ReadVolume(VolumePath: string): TMangaBook.TPageArray;
+    function ReadVolume(AReader: TReader; VolumePath: string): TMangaBook.TPageArray;
   end;
 
   { TMangaDetailsLoader }
@@ -164,10 +170,21 @@ type
     function Execute: TMangaBook.TCoverDetails; override;
   end;
 
+  { TMangaVolumeLoader }
+
+  TMangaVolumeLoader = class(TMangaManager.TReadVolumeWork)
+  private
+    FBook: TMangaBook;
+    FVolumePath: string;
+  public
+    constructor Create(Book: TMangaBook; VolumePath: string);
+    function Execute: TMangaBook.TPageArray; override;
+  end;
+
 
 implementation
 
-uses LazUTF8, LazFileUtils, DateUtils, jsonscanner, Manhuard.Manga.Loader, Manhuard.Helper.Picture;
+uses LazUTF8, LazFileUtils, DateUtils, jsonscanner, Manhuard.Strings, Manhuard.Manga.Loader, Manhuard.Helper.Picture;
 
 function GetFirstDir(Path: string): string; inline;
 var
@@ -276,6 +293,16 @@ end;
 
 { TGeneralReader }
 
+function TGeneralReader.GetVDir: TVirtualDirectory;
+begin
+  if not FScanned then
+  begin
+    ScanAll;
+    FScanned := True;
+  end;
+  Result := FVDir;
+end;
+
 procedure TGeneralReader.AddFile(FilePath: string; Size: Int64);
 begin
   FVDir.AddFile(FilePath, Size);
@@ -325,12 +352,7 @@ end;
 
 function TGeneralReader.VolumeCount: Integer;
 begin
-  if not FScanned then
-  begin
-    ScanAll;
-    FScanned := True;
-  end;
-  Result := FVDir.LeafNodeCount;
+  Result := VDir.LeafNodeCount;
 end;
 
 function TGeneralReader.FindCoverFile: string;
@@ -406,10 +428,9 @@ begin
   end
   else if Details^.Volumes = nil then
   begin
-    if not FScanned then ScanAll;
     LeafNodeList := TVirtualDirectory.TRefDirList.Create;
     try
-      MangaBook.Volumes := FVDir.FindLeafNodes(LeafNodeList);
+      MangaBook.Volumes := VDir.FindLeafNodes(LeafNodeList);
       SetLength(Details^.Volumes, MangaBook.Volumes);
       for i := 0 to MangaBook.Volumes - 1 do
       begin
@@ -427,8 +448,14 @@ begin
 end;
 
 function TGeneralReader.Read(const VolumePath: string; PageList: TPageList): boolean;
+var
+  VolumeDir: TVirtualDirectory;
+  FileItem: TVirtualDirectory.TFile;
 begin
-
+  VolumeDir := VDir.Find(VolumePath);
+  if VolumeDir = nil then Exit(False);
+  for FileItem in VolumeDir.Files do PageList.Add(FileItem);
+  Result := True;
 end;
 
 { TGeneralReader.TVirtualDirectory }
@@ -694,6 +721,30 @@ begin
   Details := ADetails;
 end;
 
+function TMangaBookHelper.ReadVolume(VolumePath: string): TMangaBook.TPageArray;
+var
+  AReader: TReader;
+begin
+  AReader := Reader;
+  try
+    Result := ReadVolume(AReader, VolumePath);
+  finally
+    AReader.Free;
+  end;end;
+
+function TMangaBookHelper.ReadVolume(AReader: TReader; VolumePath: string): TMangaBook.TPageArray;
+var
+  PageList: TPageList;
+begin
+  PageList := TPageList.Create;
+  try
+    if not AReader.Read(VolumePath, PageList) then raise EMangaReaderError.CreateFmt(MSG_FAILED_TO_READ_VOLUME, [VolumePath]);
+    Result := PageList.ToArray;
+  finally
+    PageList.Free;
+  end;
+end;
+
 { TMangaDetailsLoader }
 
 constructor TMangaDetailsLoader.Create(Book: TMangaBook);
@@ -705,6 +756,19 @@ function TMangaDetailsLoader.Execute: TMangaBook.TCoverDetails;
 begin
   FBook.Read(Result.Details);
   Result.Cover := FBook.Cover;
+end;
+
+{ TMangaVolumeLoader }
+
+constructor TMangaVolumeLoader.Create(Book: TMangaBook; VolumePath: string);
+begin
+  FBook := Book;
+  FVolumePath := VolumePath;
+end;
+
+function TMangaVolumeLoader.Execute: TMangaBook.TPageArray;
+begin
+  Result := FBook.ReadVolume(FVolumePath);
 end;
 
 

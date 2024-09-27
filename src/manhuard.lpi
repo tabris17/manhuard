@@ -15,9 +15,10 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="2">
+      <Resources Count="3">
         <Resource_0 FileName="..\icons\no-cover.png" Type="RCDATA" ResourceName="NO_COVER_LARGE"/>
         <Resource_1 FileName="..\icons\no-cover-small.png" Type="RCDATA" ResourceName="NO_COVER_SMALL"/>
+        <Resource_2 FileName="..\icons\no-image.png" Type="RCDATA" ResourceName="NO_IMAGE"/>
       </Resources>
     </General>
     <i18n>

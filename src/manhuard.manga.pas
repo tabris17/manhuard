@@ -140,7 +140,7 @@ type
     procedure RemoveEventListener(EventType: TMangaEvent.TEventType; Listener: TMangaEventListener);
     procedure Load;
     procedure ReadBook(Book: TMangaBook; OnSuccess: TReadBookWork.TOnSuccess; OnFailure: TReadBookWork.TOnFailure);
-    procedure ReadVolume(Book: TMangaBook; var Volume: TMangaBook.TVolume;
+    procedure ReadVolume(Book: TMangaBook; VolumePath: string;
                          OnSuccess: TReadVolumeWork.TOnSuccess; OnFailure: TReadVolumeWork.TOnFailure);
   end;
 
@@ -312,23 +312,23 @@ end;
 
 procedure TMangaManager.ReadBook(Book: TMangaBook; OnSuccess: TReadBookWork.TOnSuccess; OnFailure: TReadBookWork.TOnFailure);
 var
-  Reader: TMangaDetailsLoader;
+  Loader: TMangaDetailsLoader;
 begin
-  Reader := TMangaDetailsLoader.Create(Book);
-  Reader.OnSuccess := OnSuccess;
-  Reader.OnFailure := OnFailure;
-  WorkPool.Exec(Reader);
+  Loader := TMangaDetailsLoader.Create(Book);
+  Loader.OnSuccess := OnSuccess;
+  Loader.OnFailure := OnFailure;
+  WorkPool.Exec(Loader);
 end;
 
-procedure TMangaManager.ReadVolume(Book: TMangaBook; var Volume: TMangaBook.TVolume; OnSuccess: TReadVolumeWork.TOnSuccess;
+procedure TMangaManager.ReadVolume(Book: TMangaBook; VolumePath: string; OnSuccess: TReadVolumeWork.TOnSuccess;
   OnFailure: TReadVolumeWork.TOnFailure);
-//var
-  //Reader: TMangaVolumeLoader;
+var
+  Loader: TMangaVolumeLoader;
 begin
-  {Reader := TMangaVolumeLoader.Create(Book, @Volume);
-  Reader.OnSuccess := OnSuccess;
-  Reader.OnFailure := OnFailure;
-  WorkPool.Exec(Reader);}
+  Loader := TMangaVolumeLoader.Create(Book, VolumePath);
+  Loader.OnSuccess := OnSuccess;
+  Loader.OnFailure := OnFailure;
+  WorkPool.Exec(Loader);
 end;
 
 
