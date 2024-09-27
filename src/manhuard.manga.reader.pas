@@ -161,7 +161,7 @@ type
     FBook: TMangaBook;
   public
     constructor Create(Book: TMangaBook);
-    function Execute: TMangaBook.TDetails; override;
+    function Execute: TMangaBook.TCoverDetails; override;
   end;
 
 
@@ -336,17 +336,22 @@ end;
 function TGeneralReader.FindCoverFile: string;
 var
   Parser: TJSONParser;
+  JSONData: TJSONData;
 begin
   if ReadJSON(Parser) then
   begin
     try
-      Result := Parser.Parse.ReadString('cover');
-      if Result <> EmptyStr then Exit;
+      JSONData := Parser.Parse;
+      if JSONData <> nil then
+      begin
+        Result := JSONData.ReadString('cover');
+        if Result <> EmptyStr then Exit;
+      end;
     finally
       Parser.Free;
     end;
   end;
-  for Result in ['cover.png', 'cover.jpg'] do if FileExists(Result) then Exit;
+  for Result in ['cover.png', 'cover.jpg', 'cover.jpeg', 'cover.jxl', 'cover.webp', 'cover.avif'] do if FileExists(Result) then Exit;
   Result := EmptyStr;
 end;
 
@@ -696,9 +701,10 @@ begin
   FBook := Book;
 end;
 
-function TMangaDetailsLoader.Execute: TMangaBook.TDetails;
+function TMangaDetailsLoader.Execute: TMangaBook.TCoverDetails;
 begin
-  FBook.Read(Result);
+  FBook.Read(Result.Details);
+  Result.Cover := FBook.Cover;
 end;
 
 

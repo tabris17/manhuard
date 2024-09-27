@@ -5,7 +5,7 @@ unit Manhuard.Manga;
 interface
 
 uses
-  Classes, SysUtils, fgl, Contnrs, Manhuard.WorkPool;
+  Classes, SysUtils, Graphics, fgl, Contnrs, Manhuard.WorkPool;
 
 type
 
@@ -55,8 +55,12 @@ type
       Source: string;
       Volumes: TVolumeArray;
     end;
-
     PDetails = ^TDetails;
+
+    TCoverDetails = record
+      Cover: TPicture;
+      Details: TDetails;
+    end;
   private
     function GetCaption: string;
     function GetName: string;
@@ -118,7 +122,7 @@ type
   TMangaManager = class
   type
     TLoadBooksWork = specialize TWork<TMangaBooks>;
-    TReadBookWork = specialize TWork<TMangaBook.TDetails>;
+    TReadBookWork = specialize TWork<TMangaBook.TCoverDetails>;
     TReadVolumeWork = specialize TWork<TMangaBook.TPageArray>;
   private
     FBooks: TMangaBooks;

@@ -60,7 +60,7 @@ type
     FSelectedVolumePages: TMangaBook.TPageArray;
     procedure SetBook(AValue: TMangaBook);
     procedure Rearrange;
-    procedure ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetails);
+    procedure ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TCoverDetails);
     procedure ReadFailure(Sender: TMangaManager.TReadBookWork; Error: TMangaManager.TReadBookWork.TError);
     procedure ReadVolumeSuccess(Sender: TMangaManager.TReadVolumeWork; Return: TMangaBook.TPageArray);
     procedure ReadVolumeFailure(Sender: TMangaManager.TReadVolumeWork; Error: TMangaManager.TReadBookWork.TError);
@@ -225,10 +225,18 @@ begin
   LabelPlot.Top := FlowPanelBottom + 50;
 end;
 
-procedure TFrameBook.ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TDetails);
+procedure TFrameBook.ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TCoverDetails);
 begin
   Busy := False;
-  FDetail := Return;
+  if Assigned(Return.Cover) then
+  begin
+    try
+      Cover.Picture.Assign(Return.Cover);
+    finally
+      Return.Cover.Free;
+    end;
+  end;
+  FDetail := Return.Details;
   LabelWriter.Caption := WRITTEN_BY + string.Join(', ', Book.Writers);
   case FBook.SeriesState of
     ssUnknown: SetLabel(LabelStateText, LabelState, NOT_ACCESS);
@@ -240,7 +248,7 @@ begin
   SetLabel(LabelGenreText, LabelGenre, string.Join(', ', FBook.Genre));
   SetLabel(LabelLastUpdatedText, LabelLastUpdated, FBook.LastUpdated);
   SetLabel(LabelOriginalRunText, LabelOriginalRun, FBook.OriginalRun);
-  if Return.Source = EmptyStr then
+  if Return.Details.Source = EmptyStr then
   begin
     LabelTitle.Font.Color := clDefault;
     LabelTitle.Cursor := crDefault;
@@ -251,10 +259,10 @@ begin
   begin
     LabelTitle.Font.Color := clHighlight;
     LabelTitle.Cursor := crHandPoint;
-    LabelTitle.Hint := Return.Source;
+    LabelTitle.Hint := Return.Details.Source;
     LabelTitle.ShowHint := True;
   end;
-  LabelPlot.Caption := Return.Plot;
+  LabelPlot.Caption := Return.Details.Plot;
   SetTableOfContents;
   FrameResize(Self);
 end;

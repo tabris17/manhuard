@@ -13,6 +13,30 @@ type
 
   TFormList = specialize TList<TForm>;
 
+  { TIconLoader }
+
+  TIconLoader = class abstract (TListViewIconManager.TLoadIconsWork)
+  protected
+    FDataArray: TListViewIconManager.TDataArray;
+    function Load: TListViewIconManager.TDataIconPairArray;
+  public
+    constructor Create(DataArray: TListViewIconManager.TDataArray);
+  end;
+
+  { TSmallIconLoader }
+
+  TSmallIconLoader = class (TIconLoader)
+  public
+    function Execute: TListViewIconManager.TDataIconPairArray; override;
+  end;
+
+  { TLargeIconLoader }
+
+  TLargeIconLoader = class (TIconLoader)
+  public
+    function Execute: TListViewIconManager.TDataIconPairArray; override;
+  end;
+
   { TPageBookshelf }
 
   TPageBookshelf = class(TStatefulPage)
@@ -71,10 +95,12 @@ type
     procedure ListViewSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure MangaLoading(Event: TMangaEvent);
     procedure MangaLoaded(Event: TMangaEvent);
+    procedure ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
   private
     FToolBarButtonsWidth: Integer;
-    //FBookCoverManager: TMangaBookCoverManager;
+    FSmallIconManager, FLargeIconManager: TListViewIconManager;
     FOpenedBooks: TFormList;
+    FSmallDefaultIcon, FLargeDefaultIcon: TPicture;
   protected
     procedure VisibleChanged; override;
     procedure InitStatusBar; override;
@@ -108,7 +134,62 @@ implementation
 {$R *.lfm}
 
 uses LCLType, Manhuard.Form.Main, Manhuard.Types, Manhuard.Page.Book, Manhuard.WorkPool,
-  Manhuard.Config, Manhuard.Form.Book;
+  Manhuard.Config, Manhuard.Form.Book, Manhuard.Helper.Picture;
+
+{ TIconLoader }
+
+function TIconLoader.Load: TListViewIconManager.TDataIconPairArray;
+var
+  Size: SizeInt;
+  Book: TMangaBook;
+  i: Integer;
+begin
+  Size := Length(FDataArray);
+  Result := [];
+  SetLength(Result, Size);
+  for i := 0 to Size -1 do
+  begin
+    Book := TMangaBook(FDataArray[i]);
+    with Result[i] do
+    begin
+      Key := Book;
+      Value := Book.Cover;
+    end;
+  end;
+end;
+
+constructor TIconLoader.Create(DataArray: TListViewIconManager.TDataArray);
+begin
+  FDataArray := DataArray;
+end;
+
+{ TSmallIconLoader }
+
+function TSmallIconLoader.Execute: TListViewIconManager.TDataIconPairArray;
+var
+  DataIcon: TListViewIconManager.TDataIconPair;
+begin
+  Result := Load;
+  for DataIcon in Result do
+  begin
+    if Assigned(DataIcon.Value) then DataIcon.Value.Scale(ICON_SMALL_WIDTH, ICON_SMALL_HEIGHT);
+  end;
+end;
+
+{ TLargeIconLoader }
+
+function TLargeIconLoader.Execute: TListViewIconManager.TDataIconPairArray;
+var
+  DataIcon: TListViewIconManager.TDataIconPair;
+begin
+  Result := Load;
+  for DataIcon in Result do
+  begin
+    if Assigned(DataIcon.Value) then DataIcon.Value.Scale(ICON_LARGE_WIDTH, ICON_LARGE_HEIGHT);
+  end;
+end;
+
+{ TPageBookshelf }
 
 procedure TPageBookshelf.FrameResize(Sender: TObject);
 begin
@@ -120,11 +201,10 @@ procedure TPageBookshelf.ListViewCustomDrawItem(Sender: TCustomListView; Item: T
   var DefaultDraw: Boolean);
 begin
   if State = [] then Exit;
-  {case ListView.ViewStyle of
-    vsIcon: FBookCoverManager.DrawIcon(Item, birtLarge, haCenter, vaBottom);
-    vsSmallIcon: FBookCoverManager.DrawIcon(Item, birtSmall);
-    vsReport: FBookCoverManager.DrawIcon(Item, birtSmall);
-  end;}
+  if ListView.ViewStyle = vsIcon then
+    FLargeIconManager.DrawIcon(Item, haCenter, vaBottom)
+  else
+    FSmallIconManager.DrawIcon(Item);
 end;
 
 procedure TPageBookshelf.ListViewData(Sender: TObject; Item: TListItem);
@@ -133,9 +213,10 @@ var
   Writers: String;
 begin
   Book := MangaManager.Books[Item.Index];
+  Item.Data := Book;
   Writers := string.Join(', ', Book.Writers);
   if ListView.ViewStyle = vsIcon then
-    Item.Caption := Format(LV_SHORT_CAPTION, [Book.Title, Writers])
+    Item.Caption := specialize IfThen<string>(Writers = EmptyStr, Book.Caption, Format(LV_SHORT_CAPTION, [Book.Caption, Writers]))
   else
   begin
     Item.Caption := Book.Caption;
@@ -198,6 +279,16 @@ begin
   StatusText[0] := Format(MSG_TOTAL, [BooksCount]);
 end;
 
+procedure TPageBookshelf.ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
+begin
+  if Sender = FSmallIconManager then
+    LoadIconWork := TSmallIconLoader.Create(Sender.PendingData)
+  else if Sender = FLargeIconManager then
+    LoadIconWork := TLargeIconLoader.Create(Sender.PendingData)
+  else
+    LoadIconWork := nil;
+end;
+
 procedure TPageBookshelf.VisibleChanged;
 begin
   inherited VisibleChanged;
@@ -213,11 +304,20 @@ end;
 procedure TPageBookshelf.Initialize;
 var
   Button: Pointer;
-  //BookCoverResolutions: TMangaBookCoverManager.TResolutions;
-  //BookCoverDefaults: TMangaBookCoverManager.TIconTuple;
-  //DefaultSmallCover, DefaultLargeCover: TPicture;
 begin
   inherited;
+
+  FSmallDefaultIcon := TPicture.Create;
+  FSmallDefaultIcon.LoadFromResourceName(HInstance, 'NO_COVER_SMALL');
+  FLargeDefaultIcon := TPicture.Create;
+  FLargeDefaultIcon.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
+
+  FSmallIconManager := TListViewIconManager.Create(ListView);
+  FSmallIconManager.DefaultIcon := FSmallDefaultIcon;
+  FSmallIconManager.OnLoadIcon := @ListViewLoadIcon;
+  FLargeIconManager := TListViewIconManager.Create(ListView);
+  FLargeIconManager.DefaultIcon := FLargeDefaultIcon;
+  FLargeIconManager.OnLoadIcon := @ListViewLoadIcon;
 
   FOpenedBooks := TFormList.Create;
 
@@ -236,27 +336,6 @@ begin
     AddEventListener(etLoaded, @MangaLoaded);
     Load;
   end;
-
-  {with BookCoverResolutions[birtSmall] do
-  begin
-    Height := ICON_SMALL_HEIGHT;
-    Width := ICON_SMALL_WIDTH;
-  end;
-  with BookCoverResolutions[birtLarge] do
-  begin
-    Height := ICON_LARGE_HEIGHT;
-    Width := ICON_LARGE_WIDTH;
-  end;
-
-  DefaultSmallCover := TPicture.Create;
-  DefaultSmallCover.LoadFromResourceName(HInstance, 'NO_COVER_SMALL');
-  BookCoverDefaults[birtSmall] := DefaultSmallCover;
-
-  DefaultLargeCover := TPicture.Create;
-  DefaultLargeCover.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
-  BookCoverDefaults[birtLarge] := DefaultLargeCover;
-
-  FBookCoverManager := TMangaBookCoverManager.Create(ListView, BookCoverResolutions, BookCoverDefaults, Self);}
 end;
 
 procedure TPageBookshelf.Finalize;
@@ -268,8 +347,11 @@ begin
     RemoveEventListener(etLoading, @MangaLoading);
     RemoveEventListener(etLoaded, @MangaLoaded);
   end;
-
-  //FBookCoverManager.Free;
+      
+  FSmallDefaultIcon.Free;
+  FLargeDefaultIcon.Free;
+  FSmallIconManager.Free;
+  FLargeIconManager.Free;
   FOpenedBooks.Free;
   inherited;
 end;
@@ -351,23 +433,6 @@ begin
   CloseAction := caFree;
   if FOpenedBooks.Count = 0 then MenuItemEmpty.Visible := True;
 end;
-
-{function TPageBookshelf.BuildIconLoader(Indexes: TMangaBookCoverManager.TIndexArray): TMangaBookCoverManager.TLoadIconsWork;
-var
-  IndexBookPairArray: TMangaCoverLoader.TIndexBookPairArray = ();
-  Size: SizeInt;
-  i, Index: Integer;
-begin
-  Size := Length(Indexes);
-  SetLength(IndexBookPairArray, Size);
-  for i := 0 to Length(Indexes) - 1 do
-  begin
-    Index := Indexes[i];
-    IndexBookPairArray[i].Key := Index;
-    IndexBookPairArray[i].Value := MangaManager.Books[Index];
-  end;
-  Result := TMangaCoverLoader.Create(FBookCoverManager, IndexBookPairArray);
-end;}
 
 procedure TPageBookshelf.ActionRefreshExecute(Sender: TObject);
 begin

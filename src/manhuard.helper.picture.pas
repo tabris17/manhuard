@@ -15,6 +15,7 @@ type
   TPictureHelper = class helper for TPicture
   public
     procedure Resize(Width, Height: Integer);
+    procedure Scale(Width, Height: Integer);
     procedure Load(Stream: TStream);
   end;
 
@@ -84,6 +85,22 @@ begin
   try
     LoadFromPicture(Wand, Self);
     Status := MagickResizeImage(Wand, Width, Height, LanczosFilter, 1.0);
+    if Status = MagickFalse then ThrowWandException(Wand);
+    SaveToPicture(Wand, Self);
+  finally
+    Wand := DestroyMagickWand(Wand);
+  end;
+end;
+
+procedure TPictureHelper.Scale(Width, Height: Integer);
+var
+  Wand: PMagickWand;
+  Status: MagickBooleanType;
+begin
+  Wand := NewMagickWand;
+  try
+    LoadFromPicture(Wand, Self);
+    Status := MagickScaleImage(Wand, Width, Height);
     if Status = MagickFalse then ThrowWandException(Wand);
     SaveToPicture(Wand, Self);
   finally
