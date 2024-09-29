@@ -84,6 +84,7 @@ begin
   Wand := NewMagickWand;
   try
     LoadFromPicture(Wand, Self);
+    Clear;
     Status := MagickResizeImage(Wand, Width, Height, LanczosFilter, 1.0);
     if Status = MagickFalse then ThrowWandException(Wand);
     SaveToPicture(Wand, Self);
@@ -100,6 +101,7 @@ begin
   Wand := NewMagickWand;
   try
     LoadFromPicture(Wand, Self);
+    Clear;
     Status := MagickScaleImage(Wand, Width, Height);
     if Status = MagickFalse then ThrowWandException(Wand);
     SaveToPicture(Wand, Self);

@@ -5,18 +5,22 @@ unit Manhuard.Frame.Book;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics, Generics.Collections,
   Manhuard.Manga, Manhuard.Helper.ListView;
 
 type
+
+  TIconManagerDict = specialize TObjectDictionary<TMangaBook.PVolume, TListViewIconManager>;
 
   { TPageLoader }
 
   TPageLoader = class (TListViewIconManager.TLoadIconsWork)
   protected
+    FBook: TMangaBook;
+    FVolume: TMangaBook.PVolume;
     FDataArray: TListViewIconManager.TDataArray;
   public
-    constructor Create(DataArray: TListViewIconManager.TDataArray);
+    constructor Create(Book: TMangaBook; Volume: TMangaBook.PVolume; DataArray: TListViewIconManager.TDataArray);
     function Execute: TListViewIconManager.TDataIconPairArray; override;
   end;
 
@@ -66,7 +70,7 @@ type
   private
     FBook: TMangaBook;
     FDetail: TMangaBook.TDetails;
-    FIconManager: TListViewIconManager;
+    FIconManagers: TIconManagerDict;
     FDefaultIcon: TPicture;
     FBusy: boolean;
     FSelectedVolume: TMangaBook.PVolume;
@@ -83,6 +87,8 @@ type
     procedure SetLabel(LabelText, LabelValue: TLabel; Value: Integer);
     procedure SetLabel(LabelText, LabelValue: TLabel; Value: TMangaBook.TOriginalRun);
     procedure SetTableOfContents;
+    function GetIconManager: TListViewIconManager;
+    property IconManager: TListViewIconManager read GetIconManager;
   public
     property Book: TMangaBook read FBook write SetBook;
     property Busy: boolean read FBusy write SetBusy;
@@ -107,33 +113,42 @@ implementation
 
 {$R *.lfm}
 
-uses Dialogs, LCLIntf, Manhuard.Manga.Reader;
+uses Dialogs, LCLIntf, Manhuard.Manga.Reader, Manhuard.Helper.Picture;
 
 { TPageLoader }
 
-constructor TPageLoader.Create(DataArray: TListViewIconManager.TDataArray);
+constructor TPageLoader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume; DataArray: TListViewIconManager.TDataArray);
 begin
+  FBook := Book;
+  FVolume := Volume;
   FDataArray := DataArray;
 end;
 
 function TPageLoader.Execute: TListViewIconManager.TDataIconPairArray;
-{var
+var
   Size: SizeInt;
-  Book: TMangaBook;
-  i: Integer;}
+  i: Integer;
+  Page: TMangaBook.PPage;
+  Picture: TPicture;
+  PagePath: String;
 begin
-{  Size := Length(FDataArray);
+  Size := Length(FDataArray);
   Result := [];
   SetLength(Result, Size);
   for i := 0 to Size -1 do
   begin
-    Book := TMangaBook(FDataArray[i]);
+    Page := TMangaBook.PPage(FDataArray[i]);
+    { todo: 卷未加载完成时读取 Page 出错 }
+    PagePath := FVolume^.Path + '/' + Page^.Name;
+    WriteLn(PagePath);
+    Picture := FBook.ReadPage(PagePath);
+    Picture.Scale(150, 150);
     with Result[i] do
     begin
-      Key := Book;
-      Value := Book.Cover;
+      Key := Page;
+      Value := Picture;
     end;
-  end;}
+  end;
 end;
 
 { TFrameBook }
@@ -142,7 +157,7 @@ procedure TFrameBook.PageListViewCustomDrawItem(Sender: TCustomListView; Item: T
   var DefaultDraw: Boolean);
 begin
   if State = [] then Exit;
-  FIconManager.DrawIcon(Item, haCenter, vaBottom);
+  IconManager.DrawIcon(Item, haCenter, vaBottom);
 end;
 
 procedure TFrameBook.FrameResize(Sender: TObject);
@@ -182,8 +197,12 @@ begin
 end;
 
 procedure TFrameBook.PageListViewData(Sender: TObject; Item: TListItem);
+var
+  Page: TMangaBook.PPage;
 begin
-  Item.Caption := FSelectedVolumePages[Item.Index].Name;
+  Page := @FSelectedVolumePages[Item.Index];
+  Item.Caption := Page^.Name;
+  Item.Data := Page;
 end;
 
 procedure TFrameBook.SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
@@ -240,7 +259,22 @@ end;
 
 procedure TFrameBook.ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
 begin
-  LoadIconWork := TPageLoader.Create(Sender.PendingData);
+  LoadIconWork := TPageLoader.Create(FBook, FSelectedVolume, Sender.PendingData);
+end;
+
+function TFrameBook.GetIconManager: TListViewIconManager;
+begin
+  if FSelectedVolume = nil then Exit(nil);
+
+  if not FIconManagers.ContainsKey(FSelectedVolume) then
+  begin
+    Result := TListViewIconManager.Create(PageListView);
+    Result.DefaultIcon := FDefaultIcon;
+    Result.OnLoadIcon := @ListViewLoadIcon;
+    FIconManagers.Add(FSelectedVolume, Result);
+  end
+  else
+    Result := FIconManagers.Items[FSelectedVolume];
 end;
 
 procedure TFrameBook.SetBook(AValue: TMangaBook);
@@ -248,6 +282,7 @@ begin
   FBook := AValue;
   LabelTitle.Caption := FBook.Caption;
   Busy := True;
+  FIconManagers.Clear;
   MangaManager.ReadBook(FBook, @ReadSuccess, @ReadFailure);
 end;
 
@@ -422,13 +457,12 @@ begin
   FBusy := False;
   FDefaultIcon := TPicture.Create;
   FDefaultIcon.LoadFromResourceName(HInstance, 'NO_IMAGE');
-  FIconManager := TListViewIconManager.Create(PageListView);
-  FIconManager.DefaultIcon := FDefaultIcon;
+  FIconManagers := TIconManagerDict.Create([doOwnsValues]);
 end;
 
 procedure TFrameBook.Finalize;
 begin
-  FIconManager.Free;
+  FIconManagers.Free;
   FDefaultIcon.Free;
 end;
 

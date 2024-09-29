@@ -81,6 +81,11 @@ msgctxt "manhuard.strings.msg_config_save_error"
 msgid "Failed to save config file: \"%s\"."
 msgstr ""
 
+#: manhuard.strings.msg_failed_to_read_page
+#, object-pascal-format
+msgid "Failed to read page by path \"%s\""
+msgstr ""
+
 #: manhuard.strings.msg_failed_to_read_volume
 #, object-pascal-format
 msgid "Failed to read volume by path \"%s\""

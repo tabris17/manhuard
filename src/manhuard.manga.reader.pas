@@ -42,6 +42,7 @@ type
     function GetCover(Cover: TPicture): boolean; virtual; abstract;
     function Read(MangaBook: TMangaBook; Details: TMangaBook.PDetails = nil): boolean; virtual; abstract;
     function Read(const VolumePath: string; PageList: TPageList): boolean; virtual; abstract;
+    function Read(const PagePath: string; Page: TPicture): boolean; virtual; abstract;
   end;
 
   { TGeneralReader }
@@ -99,6 +100,7 @@ type
     function GetCover(Cover: TPicture): boolean; override;
     function Read(MangaBook: TMangaBook; Details: TMangaBook.PDetails = nil): boolean; override;
     function Read(const VolumePath: string; PageList: TPageList): boolean; override;
+    function Read(const PagePath: string; Page: TPicture): boolean; override;
   end;
 
   { TDirReader }
@@ -158,6 +160,8 @@ type
     procedure Read(AReader: TReader; out Details: TMangaBook.TDetails);
     function ReadVolume(VolumePath: string): TMangaBook.TPageArray;
     function ReadVolume(AReader: TReader; VolumePath: string): TMangaBook.TPageArray;
+    function ReadPage(PagePath: string): TPicture;
+    function ReadPage(AReader: TReader; PagePath: string): TPicture;
   end;
 
   { TMangaDetailsLoader }
@@ -458,6 +462,19 @@ begin
   Result := True;
 end;
 
+function TGeneralReader.Read(const PagePath: string; Page: TPicture): boolean;
+var
+  Stream: TStream;
+begin
+  if not ReadFile(PagePath, Stream) then Exit(False);
+  try
+    Page.Load(Stream);
+  finally
+    Stream.Free;
+  end;
+  Result := True;
+end;
+
 { TGeneralReader.TVirtualDirectory }
 
 function TGeneralReader.TVirtualDirectory.FindSubdir(SubdirName: string): TVirtualDirectory;
@@ -730,7 +747,8 @@ begin
     Result := ReadVolume(AReader, VolumePath);
   finally
     AReader.Free;
-  end;end;
+  end;
+end;
 
 function TMangaBookHelper.ReadVolume(AReader: TReader; VolumePath: string): TMangaBook.TPageArray;
 var
@@ -742,6 +760,28 @@ begin
     Result := PageList.ToArray;
   finally
     PageList.Free;
+  end;
+end;
+
+function TMangaBookHelper.ReadPage(PagePath: string): TPicture;
+var
+  AReader: TReader;
+begin
+  AReader := Reader;
+  try
+    Result := ReadPage(AReader, PagePath);
+  finally
+    AReader.Free;
+  end;
+end;
+
+function TMangaBookHelper.ReadPage(AReader: TReader; PagePath: string): TPicture;
+begin
+  Result := TPicture.Create;
+  if not AReader.Read(PagePath, Result) then
+  begin
+    FreeAndNil(Result);
+    raise EMangaReaderError.CreateFmt(MSG_FAILED_TO_READ_PAGE, [PagePath]);
   end;
 end;
 

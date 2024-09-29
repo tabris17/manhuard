@@ -42,6 +42,7 @@ type
       Size: Integer;
     end;
     TPageArray = array of TPage;
+    PPage = ^TPage;
 
     TVolume = record
       Path: string;
