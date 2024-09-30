@@ -29,7 +29,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MajorVersionNr Value="1"/>
-      <BuildNr Value="7"/>
+      <BuildNr Value="8"/>
       <StringTable CompanyName="Fournoas" InternalName="Manhuard" OriginalFilename="manhuard" ProductName="MangaHub"/>
     </VersionInfo>
     <BuildModes>

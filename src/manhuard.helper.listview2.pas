@@ -17,38 +17,35 @@ type
 
   TListViewIconManager = class
   type
-    TItemData = Pointer;
+    TIconCache = specialize TObjectDictionary<Pointer, TPicture>;
+    TDataIconPair = specialize TPair<Pointer, TPicture>;
+    TDataIconPairArray = array of TDataIconPair;
+    TLoadIconsWork = specialize TWork<TDataIconPairArray>;
     THorizontalAlign = (haLeft, haCenter, haRight);
     TVerticalAlign = (vaTop, vaCenter, vaBottom);
-    TIconCache = specialize TObjectDictionary<TItemData, TPicture>;
-    TLoadIconWorkBase = specialize TWork<TPicture>;
-    TLoadIconWork = class abstract (TLoadIconWorkBase)
-    private
-      FItemData: TItemData;
-    public
-      constructor Create(ItemData: TItemData);
-      property ItemData: TItemData read FItemData;
-    end;
-    TPendingList = specialize TList<TItemData>;
-    TLoadIconEvent = procedure (Sender: TListViewIconManager; ItemData: TItemData; out LoadIconWork: TLoadIconWorkBase) of object;
+    TPendingQueue = specialize TQueue<Pointer>;
+    TDataArray = specialize TArray<Pointer>;
+    TLoadIconEvent = procedure (Sender: TListViewIconManager; out LoadIconWork: TLoadIconsWork) of object;
   private
     FListView: TCustomListView;
     FDefaultIcon: TPicture;
     FIconCache: TIconCache;
-    FPendingList: TPendingList;
+    FPendingQueue: TPendingQueue;
     FCacheSizeUBound, FCacheSizeLBound: SizeInt;
     FOnLoadIcon: TLoadIconEvent;
+    function GetPendingData: TDataArray;
   public
     constructor Create(ListView: TCustomListView);
     destructor Destroy; override;
     procedure DrawIcon(Item: TListItem; HAlign: THorizontalAlign = haLeft; VAlign: TVerticalAlign = vaTop);
-    procedure LoadSuccess(Sender: TLoadIconWorkBase; Return: TPicture);
-    procedure LoadComplete(Sender: TLoadIconWorkBase);
+    procedure AsyncLoad(Data: PtrInt);
+    procedure LoadSuccess(Sender: TLoadIconsWork; Return: TDataIconPairArray);
     property Cache: TIconCache read FIconCache;
     property DefaultIcon: TPicture read FDefaultIcon write FDefaultIcon;
     property CacheSizeLBound: SizeInt read FCacheSizeLBound write FCacheSizeLBound;
     property CacheSizeUBound: SizeInt read FCacheSizeUBound write FCacheSizeUBound;
     property OnLoadIcon: TLoadIconEvent read FOnLoadIcon write FOnLoadIcon;
+    property PendingData: TDataArray read GetPendingData;
   end;
 
 implementation
@@ -57,11 +54,16 @@ uses Forms;
 
 { TListViewIconManager }
 
+function TListViewIconManager.GetPendingData: TDataArray;
+begin
+  Result := FPendingQueue.ToArray;
+end;
+
 constructor TListViewIconManager.Create(ListView: TCustomListView);
 begin
   FListView := ListView;
-  FIconCache := TIconCache.Create([doOwnsValues]);
-  FPendingList := TPendingList.Create;
+  FIconCache := TIconCache.Create;
+  FPendingQueue := TPendingQueue.Create;
   FCacheSizeUBound := DEFAULT_CACHE_SIZE_UBOUND;
   FCacheSizeLBound := DEFAULT_CACHE_SIZE_LBOUND;
 end;
@@ -69,7 +71,7 @@ end;
 destructor TListViewIconManager.Destroy;
 begin
   FIconCache.Free;
-  FPendingList.Free;
+  FPendingQueue.Free;
   inherited Destroy;
 end;
 
@@ -109,28 +111,15 @@ var
   IconRect: TRect;
   Picture, FilteredPicture: TPicture;
   X, Y: Integer;
-  IconLoader: TLoadIconWorkBase = nil;
 begin
   IconRect := Item.DisplayRect(drIcon);
   if FIconCache.ContainsKey(Item.Data) then
-  begin
-    Picture := FIconCache.Items[Item.Data];
-    if not Assigned(Picture) then Picture := FDefaultIcon;
-  end
+    Picture := FIconCache.Items[Item.Data]
   else
   begin
     Picture := FDefaultIcon;
-    if Assigned(FOnLoadIcon) and not FPendingList.Contains(Item.Data) then
-    begin
-      FOnLoadIcon(Self, Item.Data, IconLoader);
-      if Assigned(IconLoader) then
-      begin
-        FPendingList.Add(Item.Data);
-        IconLoader.OnSuccess := @LoadSuccess;
-        IconLoader.OnComplete := @LoadComplete;
-        WorkPool.Exec(IconLoader);
-      end;
-    end;
+    FPendingQueue.Enqueue(Item.Data);
+    Application.QueueAsyncCall(@AsyncLoad, 0);
   end;
   if Picture = nil then Exit;
   case HAlign of
@@ -158,11 +147,24 @@ begin
   else FListView.Canvas.Draw(X, Y, Picture.Graphic);
 end;
 
-procedure TListViewIconManager.LoadSuccess(Sender: TLoadIconWorkBase; Return: TPicture);
+procedure TListViewIconManager.AsyncLoad(Data: PtrInt);
 var
-  Key: TItemData;
+  Loader: TLoadIconsWork = nil;
 begin
-  if FIconCache.Count >= FCacheSizeUBound then
+  Application.RemoveAsyncCalls(Self);
+  if Assigned(FOnLoadIcon) then FOnLoadIcon(Self, Loader);
+  if Loader = nil then Exit;
+  FPendingQueue.Clear;
+  Loader.OnSuccess := @LoadSuccess;
+  WorkPool.Exec(Loader);
+end;
+
+procedure TListViewIconManager.LoadSuccess(Sender: TLoadIconsWork; Return: TDataIconPairArray);
+var
+  Item: TDataIconPair;
+  Key: Pointer;
+begin
+  if Length(Return) + FIconCache.Count >= FCacheSizeUBound then
   begin
     for Key in FIconCache.Keys do
     begin
@@ -170,21 +172,8 @@ begin
       if FIconCache.Count <= FCacheSizeLBound then break;
     end;
   end;
-  FIconCache.Add((Sender as TLoadIconWork).ItemData, Return);
+  for Item in Return do FIconCache.Add(Item);
   FListView.Repaint;
-end;
-
-procedure TListViewIconManager.LoadComplete(Sender: TLoadIconWorkBase);
-begin
-  FPendingList.Remove((Sender as TLoadIconWork).ItemData);
-end;
-
-{ TListViewIconManager.TLoadIconWork }
-
-constructor TListViewIconManager.TLoadIconWork.Create(ItemData: TItemData);
-begin
-  inherited Create;
-  FItemData := ItemData;
 end;
 
 

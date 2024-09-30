@@ -15,26 +15,23 @@ type
 
   { TIconLoader }
 
-  TIconLoader = class abstract (TListViewIconManager.TLoadIconsWork)
+  TIconLoader = class abstract (TListViewIconManager.TLoadIconWork)
   protected
-    FDataArray: TListViewIconManager.TDataArray;
-    function Load: TListViewIconManager.TDataIconPairArray;
-  public
-    constructor Create(DataArray: TListViewIconManager.TDataArray);
+    function Load: TPicture;
   end;
 
   { TSmallIconLoader }
 
   TSmallIconLoader = class (TIconLoader)
   public
-    function Execute: TListViewIconManager.TDataIconPairArray; override;
+    function Execute: TPicture; override;
   end;
 
   { TLargeIconLoader }
 
   TLargeIconLoader = class (TIconLoader)
   public
-    function Execute: TListViewIconManager.TDataIconPairArray; override;
+    function Execute: TPicture; override;
   end;
 
   { TPageBookshelf }
@@ -95,7 +92,8 @@ type
     procedure ListViewSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     procedure MangaLoading(Event: TMangaEvent);
     procedure MangaLoaded(Event: TMangaEvent);
-    procedure ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
+    procedure ListViewLoadIcon(Sender: TListViewIconManager; ItemData: TListViewIconManager.TItemData;
+      out LoadIconWork: TListViewIconManager.TLoadIconWorkBase);
   private
     FToolBarButtonsWidth: Integer;
     FSmallIconManager, FLargeIconManager: TListViewIconManager;
@@ -138,55 +136,28 @@ uses LCLType, Manhuard.Form.Main, Manhuard.Types, Manhuard.Page.Book, Manhuard.W
 
 { TIconLoader }
 
-function TIconLoader.Load: TListViewIconManager.TDataIconPairArray;
+function TIconLoader.Load: TPicture;
 var
-  Size: SizeInt;
   Book: TMangaBook;
-  i: Integer;
 begin
-  Size := Length(FDataArray);
-  Result := [];
-  SetLength(Result, Size);
-  for i := 0 to Size -1 do
-  begin
-    Book := TMangaBook(FDataArray[i]);
-    with Result[i] do
-    begin
-      Key := Book;
-      Value := Book.Cover;
-    end;
-  end;
-end;
-
-constructor TIconLoader.Create(DataArray: TListViewIconManager.TDataArray);
-begin
-  FDataArray := DataArray;
+  Book := TMangaBook(ItemData);
+  Result := Book.Cover;
 end;
 
 { TSmallIconLoader }
 
-function TSmallIconLoader.Execute: TListViewIconManager.TDataIconPairArray;
-var
-  DataIcon: TListViewIconManager.TDataIconPair;
+function TSmallIconLoader.Execute: TPicture;
 begin
   Result := Load;
-  for DataIcon in Result do
-  begin
-    if Assigned(DataIcon.Value) then DataIcon.Value.Scale(ICON_SMALL_WIDTH, ICON_SMALL_HEIGHT);
-  end;
+  if Assigned(Result) then Result.Scale(ICON_SMALL_WIDTH, ICON_SMALL_HEIGHT);
 end;
 
 { TLargeIconLoader }
 
-function TLargeIconLoader.Execute: TListViewIconManager.TDataIconPairArray;
-var
-  DataIcon: TListViewIconManager.TDataIconPair;
+function TLargeIconLoader.Execute: TPicture;
 begin
   Result := Load;
-  for DataIcon in Result do
-  begin
-    if Assigned(DataIcon.Value) then DataIcon.Value.Scale(ICON_LARGE_WIDTH, ICON_LARGE_HEIGHT);
-  end;
+  if Assigned(Result) then Result.Scale(ICON_LARGE_WIDTH, ICON_LARGE_HEIGHT);
 end;
 
 { TPageBookshelf }
@@ -279,12 +250,13 @@ begin
   StatusText[0] := Format(MSG_TOTAL, [BooksCount]);
 end;
 
-procedure TPageBookshelf.ListViewLoadIcon(Sender: TListViewIconManager; out LoadIconWork: TListViewIconManager.TLoadIconsWork);
+procedure TPageBookshelf.ListViewLoadIcon(Sender: TListViewIconManager; ItemData: TListViewIconManager.TItemData;
+  out LoadIconWork: TListViewIconManager.TLoadIconWorkBase);
 begin
   if Sender = FSmallIconManager then
-    LoadIconWork := TSmallIconLoader.Create(Sender.PendingData)
+    LoadIconWork := TSmallIconLoader.Create(ItemData)
   else if Sender = FLargeIconManager then
-    LoadIconWork := TLargeIconLoader.Create(Sender.PendingData)
+    LoadIconWork := TLargeIconLoader.Create(ItemData)
   else
     LoadIconWork := nil;
 end;
