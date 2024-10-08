@@ -51,7 +51,6 @@ object FrameBook: TFrameBook
     ClientHeight = 621
     ClientWidth = 687
     TabOrder = 2
-    Visible = False
     OnResize = CoverBoxResize
     object Cover: TImage
       Left = 0
@@ -449,6 +448,7 @@ object FrameBook: TFrameBook
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 4
+    Visible = False
     ViewStyle = vsIcon
     OnCustomDrawItem = PageListViewCustomDrawItem
     OnData = PageListViewData
