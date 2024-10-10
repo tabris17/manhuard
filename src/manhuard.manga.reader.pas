@@ -179,10 +179,11 @@ type
   TMangaVolumeLoader = class(TMangaManager.TReadVolumeWork)
   private
     FBook: TMangaBook;
-    FVolumePath: string;
+    FVolume: TMangaBook.PVolume;
   public
-    constructor Create(Book: TMangaBook; VolumePath: string);
+    constructor Create(Book: TMangaBook; Volume: TMangaBook.PVolume);
     function Execute: TMangaBook.TPageArray; override;
+    property Volume: TMangaBook.PVolume read FVolume;
   end;
 
 
@@ -800,15 +801,15 @@ end;
 
 { TMangaVolumeLoader }
 
-constructor TMangaVolumeLoader.Create(Book: TMangaBook; VolumePath: string);
+constructor TMangaVolumeLoader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume);
 begin
   FBook := Book;
-  FVolumePath := VolumePath;
+  FVolume := Volume;
 end;
 
 function TMangaVolumeLoader.Execute: TMangaBook.TPageArray;
 begin
-  Result := FBook.ReadVolume(FVolumePath);
+  Result := FBook.ReadVolume(FVolume^.Path);
 end;
 
 

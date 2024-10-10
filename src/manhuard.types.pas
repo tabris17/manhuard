@@ -17,6 +17,13 @@ type
     fpiBook
   );
 
+  TPtrInt = record
+    case Byte of
+      0: (Ptr: Pointer);
+      1: (Int: PtrInt);
+      2: (UInt: PtrUInt);
+  end;
+
 implementation
 
 end.

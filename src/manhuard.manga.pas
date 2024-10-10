@@ -141,7 +141,7 @@ type
     procedure RemoveEventListener(EventType: TMangaEvent.TEventType; Listener: TMangaEventListener);
     procedure Load;
     procedure ReadBook(Book: TMangaBook; OnSuccess: TReadBookWork.TOnSuccess; OnFailure: TReadBookWork.TOnFailure);
-    procedure ReadVolume(Book: TMangaBook; VolumePath: string;
+    procedure ReadVolume(Book: TMangaBook; Volume: TMangaBook.PVolume;
                          OnSuccess: TReadVolumeWork.TOnSuccess; OnFailure: TReadVolumeWork.TOnFailure);
   end;
 
@@ -321,12 +321,12 @@ begin
   WorkPool.Exec(Loader);
 end;
 
-procedure TMangaManager.ReadVolume(Book: TMangaBook; VolumePath: string; OnSuccess: TReadVolumeWork.TOnSuccess;
+procedure TMangaManager.ReadVolume(Book: TMangaBook; Volume: TMangaBook.PVolume; OnSuccess: TReadVolumeWork.TOnSuccess;
   OnFailure: TReadVolumeWork.TOnFailure);
 var
   Loader: TMangaVolumeLoader;
 begin
-  Loader := TMangaVolumeLoader.Create(Book, VolumePath);
+  Loader := TMangaVolumeLoader.Create(Book, Volume);
   Loader.OnSuccess := OnSuccess;
   Loader.OnFailure := OnFailure;
   WorkPool.Exec(Loader);
