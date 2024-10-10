@@ -15,7 +15,7 @@ type
   TPictureHelper = class helper for TPicture
   public
     procedure Resize(Width, Height: Integer);
-    procedure Scale(Width, Height: Integer);
+    procedure Scale(Width, Height: Integer; Proportional: Boolean = True);
     procedure Load(Stream: TStream);
   end;
 
@@ -93,11 +93,17 @@ begin
   end;
 end;
 
-procedure TPictureHelper.Scale(Width, Height: Integer);
+procedure TPictureHelper.Scale(Width, Height: Integer; Proportional: Boolean);
 var
   Wand: PMagickWand;
   Status: MagickBooleanType;
+  PropWidth: Integer;
 begin
+  if Proportional then
+  begin
+    PropWidth := Self.Width * Height div Self.Height;
+    if PropWidth < Width then Width := PropWidth else Height := Self.Height * Width div Self.Width;
+  end;
   Wand := NewMagickWand;
   try
     LoadFromPicture(Wand, Self);

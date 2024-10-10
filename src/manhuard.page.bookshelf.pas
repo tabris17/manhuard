@@ -173,7 +173,7 @@ procedure TPageBookshelf.ListViewCustomDrawItem(Sender: TCustomListView; Item: T
 begin
   if State = [] then Exit;
   if ListView.ViewStyle = vsIcon then
-    FLargeIconManager.DrawIcon(Item, haCenter, vaBottom)
+    FLargeIconManager.DrawIcon(Item, haCenter, vaCenter)
   else
     FSmallIconManager.DrawIcon(Item);
 end;

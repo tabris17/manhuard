@@ -170,7 +170,7 @@ procedure TFrameBook.PageListViewCustomDrawItem(Sender: TCustomListView; Item: T
   var DefaultDraw: Boolean);
 begin
   if State = [] then Exit;
-  IconManager.DrawIcon(Item, haCenter, vaBottom);
+  IconManager.DrawIcon(Item, haCenter, vaCenter);
 end;
 
 procedure TFrameBook.FrameResize(Sender: TObject);
