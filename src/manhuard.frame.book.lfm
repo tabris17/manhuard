@@ -452,6 +452,7 @@ object FrameBook: TFrameBook
     ViewStyle = vsIcon
     OnCustomDrawItem = PageListViewCustomDrawItem
     OnData = PageListViewData
+    OnDblClick = PageListViewDblClick
   end
   object StatusBar: TStatusBar
     Left = 0

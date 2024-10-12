@@ -76,6 +76,7 @@ type
     procedure CoverBoxResize(Sender: TObject);
     procedure PageListViewCustomDrawItem(Sender: TCustomListView; Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
     procedure PageListViewData(Sender: TObject; Item: TListItem);
+    procedure PageListViewDblClick(Sender: TObject);
     procedure SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
     procedure TableOfContentsSelectionChanged(Sender: TObject);
     procedure ListViewLoadIcon(Sender: TListViewIconManager; ItemData: TListViewIconManager.TItemData;
@@ -218,6 +219,11 @@ begin
   Page := @VolumeData.Pages[Item.Index];
   Item.Caption := Page^.Name;
   Item.Data := Page;
+end;
+
+procedure TFrameBook.PageListViewDblClick(Sender: TObject);
+begin
+
 end;
 
 procedure TFrameBook.SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);

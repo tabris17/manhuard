@@ -8,7 +8,7 @@ object FormBook: TFormBook
   Color = clNone
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '3.4.0.0'
+  LCLVersion = '3.6.0.0'
   inline FrameBookInWindow: TFrameBook
     Height = 597
     Width = 916
@@ -29,11 +29,11 @@ object FormBook: TFormBook
       ClientHeight = 554
       ClientWidth = 650
       ParentBackground = False
-      Visible = True
     end
     inherited PageListView: TListView
       Height = 575
       Width = 654
+      OnDblClick = nil
     end
     inherited StatusBar: TStatusBar
       Top = 575

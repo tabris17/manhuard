@@ -27,8 +27,10 @@ type
     ActionExit: TAction;
     ActionList: TActionList;
     ApplicationProperties: TApplicationProperties;
-    ImageListGrey: TImageList;
-    ImageListSolid: TImageList;
+    ToolBarIcon: TImageList;
+    ToolBarIconGrey: TImageList;
+    NavIconGrey: TImageList;
+    NavIconSolid: TImageList;
     ImageListLight: TImageList;
     MainMenu: TPopupMenu;
     MenuItem1: TMenuItem;

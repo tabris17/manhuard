@@ -48,8 +48,6 @@ type
     ActionList: TActionList;
     EditFilter: TEdit;
     ImageListView: TImageList;
-    ImageListToolBar: TImageList;
-    ImageListToolBarGrey: TImageList;
     ListView: TListView;
     MenuItem1: TMenuItem;
     MenuItemEmpty: TMenuItem;
