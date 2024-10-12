@@ -1,0 +1,18 @@
+object FormView: TFormView
+  Left = 426
+  Height = 600
+  Top = 162
+  Width = 800
+  ClientHeight = 600
+  ClientWidth = 800
+  Color = clNone
+  OnCreate = FormCreate
+  LCLVersion = '3.6.0.0'
+  object ImageView: TImage
+    Left = 0
+    Height = 600
+    Top = 0
+    Width = 800
+    Align = alClient
+  end
+end

@@ -87,6 +87,8 @@ type
     FDefaultIcon: TPicture;
     FBusy: boolean;
     FVolumeDataDict: TVolumeDataDict;
+    function GetPages(const Volume: TMangaBook.PVolume): TMangaBook.TPageArray;
+    function GetVolumes: TMangaBook.TVolumeArray;
     procedure SetBook(AValue: TMangaBook);
     procedure Rearrange;
     procedure ReadSuccess(Sender: TMangaManager.TReadBookWork; Return: TMangaBook.TCoverDetails);
@@ -104,9 +106,11 @@ type
     function GetIconManager: TListViewIconManager;
     function GetSelectedVolume: TMangaBook.PVolume;
     property IconManager: TListViewIconManager read GetIconManager;
-    property SelectedVolume: TMangaBook.PVolume read GetSelectedVolume;
   public
     property Book: TMangaBook read FBook write SetBook;
+    property Volumes: TMangaBook.TVolumeArray read GetVolumes;
+    property SelectedVolume: TMangaBook.PVolume read GetSelectedVolume;
+    property Pages[const Volume: TMangaBook.PVolume]: TMangaBook.TPageArray read GetPages;
     property Busy: boolean read FBusy write SetBusy;
     procedure Initialize;
     procedure Finalize;
@@ -116,6 +120,8 @@ const
   RIGHT_PANEL_MIN_SIZE = 312;
   ORIGINAL_RUN_FROM_TO = '%s-%s';
   TOC_PATH_DEPTH = 255;
+  PAGE_ICON_WIDTH = 150;
+  PAGE_ICON_HEIGHT = 150;
 
 resourcestring
   WRITTEN_BY = 'By ';
@@ -129,7 +135,7 @@ implementation
 
 {$R *.lfm}
 
-uses Dialogs, LCLIntf, Manhuard.Manga.Reader, Manhuard.Helper.Picture;
+uses Dialogs, LCLIntf, Manhuard.Manga.Reader, Manhuard.Helper.Picture, Manhuard.Form.View;
 
 { TPageLoader }
 
@@ -148,7 +154,7 @@ begin
   Page := TMangaBook.PPage(ItemData);
   PagePath := FVolume^.Path + '/' + Page^.Name;
   Result := FBook.ReadPage(PagePath);
-  Result.Scale(150, 150);
+  Result.Scale(PAGE_ICON_WIDTH, PAGE_ICON_HEIGHT);
 end;
 
 { TVolumeData }
@@ -223,7 +229,7 @@ end;
 
 procedure TFrameBook.PageListViewDblClick(Sender: TObject);
 begin
-
+  if FormView.Open(Self) then FormView.Show;
 end;
 
 procedure TFrameBook.SplitterCanResize(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
@@ -318,6 +324,19 @@ begin
   LabelTitle.Caption := FBook.Caption;
   Busy := True;
   MangaManager.ReadBook(FBook, @ReadSuccess, @ReadFailure);
+end;
+
+function TFrameBook.GetVolumes: TMangaBook.TVolumeArray;
+begin
+  Result := FDetails.Volumes;
+end;
+
+function TFrameBook.GetPages(const Volume: TMangaBook.PVolume): TMangaBook.TPageArray;
+var
+  VolumeData: TVolumeData;
+begin
+  VolumeData := FVolumeDataDict[SelectedVolume];
+  Result := VolumeData.Pages;
 end;
 
 procedure TFrameBook.Rearrange;

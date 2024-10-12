@@ -125,6 +125,7 @@ type
     TLoadBooksWork = specialize TWork<TMangaBooks>;
     TReadBookWork = specialize TWork<TMangaBook.TCoverDetails>;
     TReadVolumeWork = specialize TWork<TMangaBook.TPageArray>;
+    TReadPageWork = specialize TWork<TPicture>;
   private
     FBooks: TMangaBooks;
     FListenerTable: array [TMangaEvent.TEventType] of TMangaEventListenerList;
@@ -143,6 +144,8 @@ type
     procedure ReadBook(Book: TMangaBook; OnSuccess: TReadBookWork.TOnSuccess; OnFailure: TReadBookWork.TOnFailure);
     procedure ReadVolume(Book: TMangaBook; Volume: TMangaBook.PVolume;
                          OnSuccess: TReadVolumeWork.TOnSuccess; OnFailure: TReadVolumeWork.TOnFailure);
+    procedure ReadPage(Book: TMangaBook; Volume: TMangaBook.PVolume; Page: TMangaBook.PPage;
+                       OnSuccess: TReadPageWork.TOnSuccess; OnFailure: TReadPageWork.TOnFailure);
   end;
 
 var
@@ -328,6 +331,17 @@ var
   Loader: TMangaVolumeLoader;
 begin
   Loader := TMangaVolumeLoader.Create(Book, Volume);
+  Loader.OnSuccess := OnSuccess;
+  Loader.OnFailure := OnFailure;
+  WorkPool.Exec(Loader);
+end;
+
+procedure TMangaManager.ReadPage(Book: TMangaBook; Volume: TMangaBook.PVolume; Page: TMangaBook.PPage;
+                                 OnSuccess: TReadPageWork.TOnSuccess; OnFailure: TReadPageWork.TOnFailure);
+var
+  Loader: TMangaPageLoader;
+begin
+  Loader := TMangaPageLoader.Create(Book, Volume, Page);
   Loader.OnSuccess := OnSuccess;
   Loader.OnFailure := OnFailure;
   WorkPool.Exec(Loader);

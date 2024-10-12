@@ -202,6 +202,21 @@ type
   end;
 
 
+  { TMangaPageLoader }
+
+  TMangaPageLoader = class(TMangaManager.TReadPageWork)
+  private
+    FBook: TMangaBook;
+    FVolume: TMangaBook.PVolume;
+    FPage: TMangaBook.PPage;
+  public
+    constructor Create(Book: TMangaBook; Volume: TMangaBook.PVolume; Page: TMangaBook.PPage);
+    function Execute: TPicture; override;
+    property Volume: TMangaBook.PVolume read FVolume; 
+    property Page: TMangaBook.PPage read FPage;
+  end;
+
+
 implementation
 
 uses LazUTF8, LazFileUtils, DateUtils, jsonscanner,
@@ -758,7 +773,7 @@ begin
         if (RHDF_DIRECTORY and HeaderData.Flags) > 0 then break;
         Stream := TMemoryStream.Create;
         RARSetCallback(RarFile, @UnrarCallback, PtrInt(Stream));
-        if RARProcessFile(RarFile, RAR_EXTRACT, nil, nil) > 0 then
+        if RARProcessFile(RarFile, RAR_TEST, nil, nil) > 0 then
         begin
           FreeAndNil(Stream);
           break;
@@ -961,6 +976,7 @@ end;
 
 constructor TMangaDetailsLoader.Create(Book: TMangaBook);
 begin
+  inherited Create;
   FBook := Book;
 end;
 
@@ -974,6 +990,7 @@ end;
 
 constructor TMangaVolumeLoader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume);
 begin
+  inherited Create;
   FBook := Book;
   FVolume := Volume;
 end;
@@ -981,6 +998,24 @@ end;
 function TMangaVolumeLoader.Execute: TMangaBook.TPageArray;
 begin
   Result := FBook.ReadVolume(FVolume^.Path);
+end;
+
+{ TMangaPageLoader }
+
+constructor TMangaPageLoader.Create(Book: TMangaBook; Volume: TMangaBook.PVolume; Page: TMangaBook.PPage);
+begin
+  inherited Create;
+  FBook := Book;
+  FVolume := Volume;
+  FPage := Page;
+end;
+
+function TMangaPageLoader.Execute: TPicture;
+var
+  PagePath: String;
+begin
+  PagePath := FVolume^.Path + '/' + FPage^.Name;
+  Result := FBook.ReadPage(PagePath);
 end;
 
 

@@ -317,6 +317,14 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Manhuard.Helper.Picture"/>
       </Unit>
+      <Unit>
+        <Filename Value="manhuard.form.view.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormView"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Manhuard.Form.View"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
