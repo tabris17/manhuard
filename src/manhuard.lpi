@@ -43,7 +43,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs"/>
+            <OtherUnitFiles Value="..\libs"/>
             <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -85,7 +85,6 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs"/>
             <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -318,10 +317,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Manhuard.Helper.Picture"/>
       </Unit>
-      <Unit>
-        <Filename Value="libs\UnRAR.pp"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -332,7 +327,6 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="libs"/>
       <UnitOutputDirectory Value="..\build\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

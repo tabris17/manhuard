@@ -16,6 +16,12 @@ interface
 uses Windows;
 
 const
+  RHDF_SPLITBEFORE = $01;
+  RHDF_SPLITAFTER  = $02;
+  RHDF_ENCRYPTED   = $04;
+  RHDF_SOLID       = $10;
+  RHDF_DIRECTORY   = $20;
+
   ERAR_END_ARCHIVE    = 10;
   ERAR_NO_MEMORY      = 11;
   ERAR_BAD_DATA       = 12;
@@ -114,7 +120,7 @@ type
     Reserved: array [0..31] of UInt;
   end;
 
-  TUnrarCallback = function(Msg: UInt; UserData, P1, P2: Longint): Integer;
+  TUnrarCallback = function(Msg: UInt; UserData, P1, P2: LPARAM): Integer;
 
 function RAROpenArchive(ArchiveData: PRAROpenArchiveData): THandle;
 function RAROpenArchiveEx(ArchiveData: PRAROpenArchiveDataEx): THandle;
@@ -123,7 +129,7 @@ function RARReadHeader(hArcData: THandle; HeaderData: PRARHeaderData): Integer;
 function RARReadHeaderEx(hArcData: THandle; HeaderData: PRARHeaderDataEx): Integer;
 function RARProcessFile(hArcData: THandle; Operation: Integer; DestPath, DestName: PChar): Integer;
 function RARProcessFileW(hArcData: THandle; Operation: Integer; DestPath, DestName: PWideChar): Integer;
-procedure RARSetCallback(hArcData: THandle; UnrarCallback: TUnrarCallback; UserData: Longint);
+procedure RARSetCallback(hArcData: THandle; UnrarCallback: TUnrarCallback; UserData: LPARAM);
 procedure RARSetPassword(hArcData: THandle; Password: PChar);
 
 // obsolete functions
@@ -150,7 +156,7 @@ function RARProcessFile(hArcData: THandle; Operation: Integer; DestPath, DestNam
   external 'unrar.dll' name 'RARProcessFile';
 function RARProcessFileW(hArcData: THandle; Operation: Integer; DestPath, DestName: PWideChar): Integer;
   external 'unrar.dll' name 'RARProcessFileW';
-procedure RARSetCallback(hArcData: THandle; UnrarCallback: TUnrarCallback; UserData: Longint);
+procedure RARSetCallback(hArcData: THandle; UnrarCallback: TUnrarCallback; UserData: LPARAM);
   external 'unrar.dll' name 'RARSetCallback';
 procedure RARSetPassword(hArcData: THandle; Password: PChar);
   external 'unrar.dll' name 'RARSetPassword';

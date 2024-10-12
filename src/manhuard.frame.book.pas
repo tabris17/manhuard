@@ -344,7 +344,9 @@ begin
     finally
       Return.Cover.Free;
     end;
-  end;
+  end
+  else
+    Cover.Picture.LoadFromResourceName(HInstance, 'NO_COVER_LARGE');
   FDetails := Return.Details;
   LabelWriter.Caption := WRITTEN_BY + string.Join(', ', Book.Writers);
   case FBook.SeriesState of

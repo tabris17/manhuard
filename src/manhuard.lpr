@@ -11,12 +11,13 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Manhuard.Strings,
-  Forms, Manhuard.Form.Main, UnRAR;
+  Forms, Manhuard.Form.Main;
 
 {$R *.res}
 
 begin
   RequireDerivedFormResource:=True;
+  Application.Title:=APP_NAME;
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TFormMain, FormMain);

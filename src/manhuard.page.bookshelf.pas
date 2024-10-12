@@ -408,6 +408,8 @@ end;
 
 procedure TPageBookshelf.ActionRefreshExecute(Sender: TObject);
 begin
+  FSmallIconManager.Cache.Clear;
+  FLargeIconManager.Cache.Clear;
   MangaManager.Load;
 end;
 

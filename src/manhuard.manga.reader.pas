@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, fpjson, jsonparser, Generics.Collections, Unzip, ZipUtils, LibTar,
-  Manhuard.Manga, Manhuard.Helper.ListView;
+  Manhuard.Manga;
 
 const
   MANGA_PACKAGE_FILE_EXTS : array[mptZip..mptEPub] of string = ('.cbz', '.cba', '.cbr', '.epub');
@@ -127,16 +127,31 @@ type
     destructor Destroy; override;
   end;
 
+  {$ifdef WINDOWS}
+
   { TRarReader }
 
-  TRarReader = class(TReader)
-
+  TRarReader = class(TGeneralReader)
+  protected
+    procedure ScanAll; override;
+    function ReadFile(FilePath: string; out Stream: TStream): boolean; override;
+    function FileExists(FilePath: string): boolean; override;
   end;
+
+  {$endif}
 
   { TTarReader }
 
-  TTarReader = class(TReader)
-
+  TTarReader = class(TGeneralReader)
+  private
+    FTarFile: TTarArchive;
+  protected
+    procedure ScanAll; override;
+    function ReadFile(FilePath: string; out Stream: TStream): boolean; override;
+    function FileExists(FilePath: string): boolean; override;
+  public
+    constructor Create(APath: string);
+    destructor Destroy; override;
   end;
 
   { TEPubReader }
@@ -189,7 +204,11 @@ type
 
 implementation
 
-uses LazUTF8, LazFileUtils, DateUtils, jsonscanner, Manhuard.Strings, Manhuard.Manga.Loader, Manhuard.Helper.Picture;
+uses LazUTF8, LazFileUtils, DateUtils, jsonscanner,
+  {$ifdef WINDOWS}
+  UnRar,
+  {$endif}
+  Manhuard.Strings, Manhuard.Helper.Picture;
 
 function GetFirstDir(Path: string): string; inline;
 var
@@ -347,6 +366,7 @@ var
   Stream: TStream;
 begin
   if not ReadFile(MANGA_BOOK_JSON_FILE_NAME, Stream) then Exit(False);
+  Stream.Position := 0;
   try
     Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
   finally
@@ -420,13 +440,16 @@ var
   Parser: TJSONParser;
   LeafNodeList: TVirtualDirectory.TRefDirList;
   i: Integer;
+  NoData: Boolean = False;
 begin
-  if not ReadJSON(Parser) then Exit(False);
-  try
-    ParseJSON(Parser.Parse, MangaBook, Details);
-  finally
-    Parser.Free;
-  end;
+  if ReadJSON(Parser) then
+  begin
+    try
+      ParseJSON(Parser.Parse, MangaBook, Details);
+    finally
+      Parser.Free;
+    end;
+  end else NoData := True;
   if Details = nil then
   begin
     if MangaBook.Volumes = 0 then MangaBook.Volumes := VolumeCount;
@@ -449,7 +472,7 @@ begin
       LeafNodeList.Free;
     end;
   end;
-  Result := True;
+  Result := (not NoData) or (MangaBook.Volumes > 0);
 end;
 
 function TGeneralReader.Read(const VolumePath: string; PageList: TPageList): boolean;
@@ -596,7 +619,7 @@ begin
   if FindFirst(ConcatPaths([BasePath, APath, '*']), faAnyFile, SearchRec) <> 0 then Exit;
   repeat
     {$warn 5044 off}
-    if string(SearchRec.Name).StartsWith('.'){$ifdef Windows} or (faHidden and SearchRec.Attr > 0){$endif} then continue;
+    if string(SearchRec.Name).StartsWith('.'){$ifdef WINDOWS} or (faHidden and SearchRec.Attr > 0){$endif} then continue;
     {$warn 5044 on}
     SubItem := specialize IfThen<string>(APath = EmptyStr, SearchRec.Name, ConcatPaths([APath, SearchRec.Name]));
     if faDirectory and SearchRec.Attr = 0 then
@@ -644,7 +667,7 @@ var
   UnzFileInfo: unz_file_info;
   FileName: shortstring;
 begin
-  if (unzLocateFile(FZipFile, PChar(FilePath), 2) <> UNZ_OK) or
+  if (unzLocateFile(FZipFile, PChar(UTF8ToWinCP(FilePath)), 2) <> UNZ_OK) or
      (unzGetCurrentFileInfo(FZipFile, @UnzFileInfo, @FileName[1], Sizeof(FileName) - 1, nil, 0, nil, 0) <> UNZ_OK) or
      (unzOpenCurrentFile(FZipFile) <> UNZ_OK) then Exit(False);
   try
@@ -674,6 +697,152 @@ begin
   inherited Destroy;
 end;
 
+{$ifdef WINDOWS}
+
+function UnrarCallback(Msg: UInt32 ; UserData, P1, P2: PtrInt): Integer; stdcall;
+var
+  Stream: TMemoryStream;
+begin
+  if Msg <> UCM_PROCESSDATA then Exit(1);
+  Stream := TMemoryStream(UserData);
+  Stream.Write(PByte(P1)^, P2);
+  Result := 1;
+end;
+
+{ TRarReader }
+
+procedure TRarReader.ScanAll;
+var                         
+  RarFile: THANDLE;
+  OpenData: TRAROpenArchiveData;
+  HeaderData: TRARHeaderData;
+  FilePath: string;
+begin
+  HeaderData := Default(TRARHeaderData);
+  OpenData := Default(TRAROpenArchiveData);
+  OpenData.ArcName := PChar(UTF8ToWinCP(Path));
+  OpenData.OpenMode := RAR_OM_LIST;
+  RarFile := RAROpenArchive(@OpenData);
+  if RarFile = 0 then raise EFOpenError.CreateFmt('Unable to open file "%s"', [Path]);
+  try
+    repeat
+      if RARReadHeader(RarFile, @HeaderData) > 0 then break;
+      if (RHDF_DIRECTORY and HeaderData.Flags) > 0 then continue;
+      FilePath := WinCPToUTF8(HeaderData.FileName).Replace('\', '/');
+      AddFile(FilePath, HeaderData.UnpSize);
+    until RARProcessFile(RarFile, RAR_SKIP, nil, nil) > 0;
+  finally
+    RARCloseArchive(RarFile);
+  end;
+end;
+
+function TRarReader.ReadFile(FilePath: string; out Stream: TStream): boolean;
+var
+  HeaderData: TRARHeaderData;
+  OpenData: TRAROpenArchiveData;
+  RarFile: THANDLE;
+  AFilePath: String;
+begin
+  HeaderData := Default(TRARHeaderData);
+  OpenData := Default(TRAROpenArchiveData);
+  OpenData.ArcName := PChar(UTF8ToWinCP(Path));
+  OpenData.OpenMode := RAR_OM_EXTRACT;
+  RarFile := RAROpenArchive(@OpenData);
+  if RarFile = 0 then raise EFOpenError.CreateFmt('Unable to open file "%s"', [Path]);
+  try
+    while RARReadHeader(RarFile, @HeaderData) = 0 do
+    begin
+      AFilePath := WinCPToUTF8(HeaderData.FileName).Replace('\', '/');
+      if AFilePath = FilePath then
+      begin
+        if (RHDF_DIRECTORY and HeaderData.Flags) > 0 then break;
+        Stream := TMemoryStream.Create;
+        RARSetCallback(RarFile, @UnrarCallback, PtrInt(Stream));
+        if RARProcessFile(RarFile, RAR_EXTRACT, nil, nil) > 0 then
+        begin
+          FreeAndNil(Stream);
+          break;
+        end;
+        Exit(True);
+      end;
+      if RARProcessFile(RarFile, RAR_SKIP, nil, nil) > 0 then break;
+    end;
+  finally
+    RARCloseArchive(RarFile);
+  end;
+  Result := False;
+end;
+
+function TRarReader.FileExists(FilePath: string): boolean;
+var
+  APath, AFileName: String;
+  Dir: TVirtualDirectory;
+  FileItem: TVirtualDirectory.TFile;
+begin
+  APath := ExtractFilePath(FilePath);
+  AFileName := ExtractFileName(FilePath);
+  Dir := VDir.Find(APath);
+  if Dir = nil then Exit(False);
+  for FileItem in Dir.Files do if FileItem.Name = AFileName then Exit(True);
+  Result := False;
+end;
+
+{$endif}
+
+{ TTarReader }
+
+procedure TTarReader.ScanAll;
+var
+  DirRec: TTarDirRec;
+begin
+  while FTarFile.FindNext(DirRec) do if DirRec.FileType = ftNormal then AddFile(DirRec.Name, DirRec.Size);
+  FTarFile.Reset;
+end;
+
+function TTarReader.ReadFile(FilePath: string; out Stream: TStream): boolean;
+var
+  DirRec: TTarDirRec;
+begin
+  try
+    while FTarFile.FindNext(DirRec) do
+    begin
+      if DirRec.Name = FilePath then
+      begin
+        Stream := TMemoryStream.Create;
+        FTarFile.ReadFile(Stream);
+        Exit(True);
+      end;
+    end;
+  finally
+    FTarFile.Reset;
+  end;
+  Result := False;
+end;
+
+function TTarReader.FileExists(FilePath: string): boolean;
+var
+  DirRec: TTarDirRec;
+begin
+  try
+    while FTarFile.FindNext(DirRec) do if DirRec.Name = FilePath then Exit(True);
+  finally
+    FTarFile.Reset;
+  end;
+  Result := False;
+end;
+
+constructor TTarReader.Create(APath: string);
+begin
+  inherited;
+  FTarFile := TTarArchive.Create(APath);
+end;
+
+destructor TTarReader.Destroy;
+begin
+  FTarFile.Free;
+  inherited Destroy;
+end;
+
 { TMangaBookHelper }
 
 function TMangaBookHelper.GetCover: TPicture;
@@ -695,7 +864,9 @@ begin
     mptDir: Result := TDirReader.Create(Path);
     mptZip: Result := TZipReader.Create(Path);
     mptTar: Result := TTarReader.Create(Path);
+    {$ifdef WINDOWS}
     mptRar: Result := TRarReader.Create(Path);
+    {$endif}
     mptEPub: Result := TEPubReader.Create(Path);
   else
     raise EArgumentOutOfRangeException.Create('Not implemented');

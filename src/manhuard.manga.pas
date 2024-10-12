@@ -225,6 +225,7 @@ end;
 
 function TMangaBooks.Add(Book: TMangaBook): Integer;
 begin
+  if Book = nil then Exit(-1);
   Result := FBooks.Add(Book);
 end;
 

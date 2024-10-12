@@ -52,8 +52,11 @@ procedure TMangaLoader.ScanDir(Path: string);
 
   function LoadBook(MangaPath: string; PackageType: TMangaBook.TPackageType): TMangaBook;
   begin
-    Result := TMangaBook.Create(MangaPath, PackageType);
-    Result.Read;
+    try
+      Result := TMangaBook.Create(MangaPath, PackageType);
+      Result.Read;
+    except on Exc: Exception do FreeAndNil(Result);
+    end;
   end;
 
 var
@@ -76,8 +79,8 @@ begin
         end
         else if IsMangaFile(SubPath, PackageType) then
           FBooks.Add(LoadBook(SubPath, PackageType));
+        if Canceling then Cancel;
       until FindNext(SearchRec) <> 0;
-      if Canceling then Cancel;
     finally
       FindClose(SearchRec);
     end;
