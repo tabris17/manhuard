@@ -7,12 +7,86 @@ object FormView: TFormView
   ClientWidth = 800
   Color = clNone
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '3.6.0.0'
-  object ImageView: TImage
+  object ToolBar: TToolBar
     Left = 0
-    Height = 600
     Top = 0
     Width = 800
+    ButtonHeight = 30
+    ButtonWidth = 32
+    DisabledImages = FormMain.ToolBarIconGrey
+    HotImages = FormMain.ToolBarIcon
+    TabOrder = 1
+  end
+  object ScrollBox: TScrollBox
+    Left = 0
+    Height = 546
+    Top = 32
+    Width = 800
+    HorzScrollBar.Increment = 10
+    HorzScrollBar.Page = 100
+    HorzScrollBar.Smooth = True
+    HorzScrollBar.Tracking = True
+    VertScrollBar.Increment = 10
+    VertScrollBar.Page = 100
+    VertScrollBar.Smooth = True
+    VertScrollBar.Tracking = True
     Align = alClient
+    ClientHeight = 542
+    ClientWidth = 796
+    Color = clBackground
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 0
+    OnResize = ScrollBoxResize
+    object ImageView: TImage
+      Left = 0
+      Height = 100
+      Top = 0
+      Width = 100
+      AutoSize = True
+    end
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Height = 22
+    Top = 578
+    Width = 800
+    Panels = <>
+  end
+  object ActionList: TActionList
+    Left = 313
+    Top = 121
+    object ActionNextPage: TAction
+      OnExecute = ActionNextPageExecute
+      ShortCut = 34
+    end
+    object ActionPreviousPage: TAction
+      OnExecute = ActionPreviousPageExecute
+      ShortCut = 33
+    end
+    object ActionNextVolume: TAction
+      OnExecute = ActionNextVolumeExecute
+    end
+    object ActionPreviousVolume: TAction
+      OnExecute = ActionPreviousVolumeExecute
+    end
+    object ActionScrollUp: TAction
+      OnExecute = ActionScrollUpExecute
+      ShortCut = 38
+    end
+    object ActionScrollDown: TAction
+      OnExecute = ActionScrollDownExecute
+      ShortCut = 40
+    end
+    object ActionScrollLeft: TAction
+      OnExecute = ActionScrollLeftExecute
+      ShortCut = 37
+    end
+    object ActionScrollRight: TAction
+      OnExecute = ActionScrollRightExecute
+      ShortCut = 39
+    end
   end
 end

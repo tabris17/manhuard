@@ -88,7 +88,7 @@ type
     procedure AddFile(FilePath: string; Size: Int64);
     procedure ParseJSON(JSONData: TJSONData; MangaBook: TMangaBook; Details: TMangaBook.PDetails);
     procedure ScanAll; virtual; abstract;
-    function ReadJSON(out Parser: TJSONParser): boolean;
+    function ReadJSON: TJSONData;
     function ReadFile(FilePath: string; out Stream: TStream): boolean; virtual; abstract;
     function FileExists(FilePath: string): boolean; virtual; abstract;
     function VolumeCount: Integer;
@@ -376,18 +376,18 @@ begin
   if MangaBook.Volumes = 0 then MangaBook.Volumes := Length(Details^.Volumes);
 end;
 
-function TGeneralReader.ReadJSON(out Parser: TJSONParser): boolean;
+function TGeneralReader.ReadJSON: TJSONData;
 var
   Stream: TStream;
 begin
-  if not ReadFile(MANGA_BOOK_JSON_FILE_NAME, Stream) then Exit(False);
-  Stream.Position := 0;
+  if not ReadFile(MANGA_BOOK_JSON_FILE_NAME, Stream) then Exit(nil);
   try
-    Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
+    Stream.Position := 0;
+    Result := GetJSON(Stream);
+    //Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
   finally
     Stream.Free;
   end;
-  Result := True;
 end;
 
 function TGeneralReader.VolumeCount: Integer;
@@ -397,21 +397,15 @@ end;
 
 function TGeneralReader.FindCoverFile: string;
 var
-  Parser: TJSONParser;
   JSONData: TJSONData;
 begin
-  if ReadJSON(Parser) then
-  begin
-    try
-      JSONData := Parser.Parse;
-      if JSONData <> nil then
-      begin
-        Result := JSONData.ReadString('cover');
-        if Result <> EmptyStr then Exit;
-      end;
-    finally
-      Parser.Free;
-    end;
+  JSONData := ReadJSON;
+  if JSONData = nil then Exit(EmptyStr);
+  try
+    Result := JSONData.ReadString('cover');
+    if Result <> EmptyStr then Exit;
+  finally
+    JSONData.Free;
   end;
   for Result in ['cover.png', 'cover.jpg', 'cover.jpeg', 'cover.jxl', 'cover.webp', 'cover.avif'] do if FileExists(Result) then Exit;
   Result := EmptyStr;
@@ -452,19 +446,21 @@ end;
 
 function TGeneralReader.Read(MangaBook: TMangaBook; Details: TMangaBook.PDetails): boolean;
 var
-  Parser: TJSONParser;
+  JSONData: TJSONData;
   LeafNodeList: TVirtualDirectory.TRefDirList;
   i: Integer;
   NoData: Boolean = False;
 begin
-  if ReadJSON(Parser) then
+  JSONData := ReadJSON;
+  if JSONData <> nil then
   begin
     try
-      ParseJSON(Parser.Parse, MangaBook, Details);
+      ParseJSON(JSONData, MangaBook, Details);
     finally
-      Parser.Free;
+      JSONData.Free;
     end;
-  end else NoData := True;
+  end
+  else NoData := True;
   if Details = nil then
   begin
     if MangaBook.Volumes = 0 then MangaBook.Volumes := VolumeCount;

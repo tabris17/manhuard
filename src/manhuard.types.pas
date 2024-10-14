@@ -24,6 +24,8 @@ type
       2: (UInt: PtrUInt);
   end;
 
+  TViewSizeAdaptation = (vsaRaw, vsaOneSide, vsaFull);
+
 implementation
 
 end.

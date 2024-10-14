@@ -43,8 +43,8 @@ var
   Stream: TMemoryStream;
 begin
   Stream := TMemoryStream.Create;
-  Picture.SaveToStream(Stream);
   try
+    Picture.SaveToStream(Stream);
     Status := MagickReadImageBlob(Wand, Stream.Memory, Stream.Size);
     if Status = MagickFalse then ThrowWandException(Wand);
   finally
@@ -97,12 +97,16 @@ procedure TPictureHelper.Scale(Width, Height: Integer; Proportional: Boolean);
 var
   Wand: PMagickWand;
   Status: MagickBooleanType;
-  PropWidth: Integer;
-begin
+  OriginalWidth, OriginalHeight, PropWidth: Integer;
+begin                           
+  OriginalWidth := Self.Width;
+  OriginalHeight := Self.Height;
+  if (OriginalWidth = 0) or (OriginalHeight = 0) then Exit;
+
   if Proportional then
   begin
-    PropWidth := Self.Width * Height div Self.Height;
-    if PropWidth < Width then Width := PropWidth else Height := Self.Height * Width div Self.Width;
+    PropWidth := Self.Width * Height div OriginalHeight;
+    if PropWidth < Width then Width := PropWidth else Height := OriginalHeight * Width div OriginalWidth;
   end;
   Wand := NewMagickWand;
   try

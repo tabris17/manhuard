@@ -5,7 +5,7 @@ unit Manhuard.Config;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, IniFiles, Manhuard.Strings;
+  Classes, SysUtils, ComCtrls, IniFiles, Manhuard.Strings, Manhuard.Types;
 
 type
 
@@ -41,6 +41,11 @@ type
       end;
     end;
 
+    View: record
+      SideBySide: Boolean;
+      SizeAdaptation: TViewSizeAdaptation;
+    end;
+
     MangaDirs: TStringArray;
 
     procedure Load;
@@ -66,6 +71,10 @@ var
       ListView: (
         ViewStyle: BOOKSHELF_LISTVIEW_VIEWSTYLE
       )
+    );
+    View: (
+      SideBySide: False;
+      SizeAdaptation: vsaOneSide;
     );
   );
 

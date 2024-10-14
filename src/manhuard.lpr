@@ -10,12 +10,19 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Manhuard.Strings,
-  Forms, Manhuard.Form.Main, Manhuard.Form.View;
+  Forms,
+  {$IFDEF DEBUG}
+  SysUtils,
+  {$ENDIF}
+  Manhuard.Strings, Manhuard.Form.Main, Manhuard.Form.View;
 
 {$R *.res}
 
 begin
+  {$IFDEF DEBUG}
+  if FileExists('heap.trc') then DeleteFile('heap.trc');
+  SetHeapTraceOutput('heap.trc');
+  {$ENDIF}
   RequireDerivedFormResource:=True;
   Application.Title:=APP_NAME;
   Application.Scaled:=True;
