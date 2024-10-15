@@ -11,16 +11,12 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms,
-  {$IFDEF DEBUG}
-  SysUtils,
-  {$ENDIF}
   Manhuard.Strings, Manhuard.Form.Main, Manhuard.Form.View;
 
 {$R *.res}
 
 begin
-  {$IFDEF DEBUG}
-  if FileExists('heap.trc') then DeleteFile('heap.trc');
+  {$IF Declared(UseHeapTrace)}
   SetHeapTraceOutput('heap.trc');
   {$ENDIF}
   RequireDerivedFormResource:=True;

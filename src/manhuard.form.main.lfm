@@ -8,6 +8,7 @@ object FormMain: TFormMain
   Color = clNone
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '3.6.0.0'
   object Navbar: TToolBar
     Left = 0

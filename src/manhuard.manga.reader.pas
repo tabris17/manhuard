@@ -383,8 +383,11 @@ begin
   if not ReadFile(MANGA_BOOK_JSON_FILE_NAME, Stream) then Exit(nil);
   try
     Stream.Position := 0;
-    Result := GetJSON(Stream);
-    //Parser := TJSONParser.Create(Stream, [joUTF8, joComments, joIgnoreTrailingComma, joIgnoreDuplicates]);
+    try
+      Result := GetJSON(Stream);
+    except
+      on Exc: EJSONParser do Result := nil;
+    end;
   finally
     Stream.Free;
   end;
@@ -400,12 +403,14 @@ var
   JSONData: TJSONData;
 begin
   JSONData := ReadJSON;
-  if JSONData = nil then Exit(EmptyStr);
-  try
-    Result := JSONData.ReadString('cover');
-    if Result <> EmptyStr then Exit;
-  finally
-    JSONData.Free;
+  if JSONData <> nil then
+  begin
+    try
+      Result := JSONData.ReadString('cover');
+      if Result <> EmptyStr then Exit;
+    finally
+      JSONData.Free;
+    end;
   end;
   for Result in ['cover.png', 'cover.jpg', 'cover.jpeg', 'cover.jxl', 'cover.webp', 'cover.avif'] do if FileExists(Result) then Exit;
   Result := EmptyStr;

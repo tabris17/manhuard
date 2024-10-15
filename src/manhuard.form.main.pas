@@ -71,6 +71,7 @@ type
     procedure ActionSearchExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure PythonIOSendData(Sender: TObject; const Data: AnsiString);
     procedure NavbarResize(Sender: TObject);
     procedure ToolButtonMainMenuClick(Sender: TObject);
@@ -117,6 +118,11 @@ begin
   Navigate(fpiHome);
   ActionHome.Checked:=True;
   TrayIcon.Icon := Application.Icon;
+end;
+
+procedure TFormMain.FormDestroy(Sender: TObject);
+begin
+  FHistory.Free;
 end;
 
 procedure TFormMain.ActionExitExecute(Sender: TObject);
