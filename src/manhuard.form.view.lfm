@@ -6,6 +6,7 @@ object FormView: TFormView
   ClientHeight = 600
   ClientWidth = 800
   Color = clNone
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '3.6.0.0'

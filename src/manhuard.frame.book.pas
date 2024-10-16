@@ -101,7 +101,6 @@ type
     procedure SetLabel(LabelText, LabelValue: TLabel; Value: Integer);
     procedure SetLabel(LabelText, LabelValue: TLabel; Value: TMangaBook.TOriginalRun);
     procedure SetTableOfContents;
-    procedure Reset;
     function CreateIconManager: TListViewIconManager;
     function GetIconManager: TListViewIconManager;
     function GetSelectedVolume: TMangaBook.PVolume;
@@ -114,6 +113,7 @@ type
     property Busy: boolean read FBusy write SetBusy;
     procedure Initialize;
     procedure Finalize;
+    procedure Reset;
   end;
 
 const
@@ -534,14 +534,15 @@ end;
 procedure TFrameBook.Initialize;
 begin
   FVolumeDataDict := TVolumeDataDict.Create([doOwnsValues]);
-  Reset;
   FDefaultIcon := TPicture.Create;
   FDefaultIcon.LoadFromResourceName(HInstance, 'NO_IMAGE');
+  FBook := nil;
+  FBusy := False;
+  FDetails := Default(TMangaBook.TDetails);
 end;
 
 procedure TFrameBook.Finalize;
 begin
-  Reset;
   FDefaultIcon.Free;
   FVolumeDataDict.Free;
 end;

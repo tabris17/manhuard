@@ -11,22 +11,27 @@ inherited PageBook: TPageBook
     ClientHeight = 380
     TabOrder = 1
     inherited TableOfContents: TTreeView
-      Height = 380
+      Height = 358
     end
     inherited Splitter: TSplitter
-      Height = 380
+      Height = 358
     end
     inherited CoverBox: TScrollBox
-      Height = 380
-      HorzScrollBar.Page = 196
-      VertScrollBar.Page = 248
-      ClientHeight = 376
+      Height = 358
+      VertScrollBar.Page = 354
+      ClientHeight = 354
+      ClientWidth = 670
       inherited Cover: TImage
         Left = 16
-        Top = 8
         ImageIndex = 1
         Images = PageBookshelf.ImageListView
       end
+    end
+    inherited PageListView: TListView
+      Height = 358
+    end
+    inherited StatusBar: TStatusBar
+      Top = 358
     end
   end
   inherited ImageList: TImageList[2]

@@ -16,7 +16,8 @@ type
   private
     FBook: TMangaBook;
     procedure SetBook(AValue: TMangaBook);
-
+  protected
+    procedure PageBackwardQuery(var CanBackward: Boolean); override;
   public
     property Book: TMangaBook write SetBook;
     procedure Initialize; override;
@@ -35,6 +36,11 @@ begin
   FBook := AValue;
   LabelTitle.Caption := FBook.Caption;
   FrameBookInPage.Book := FBook;
+end;
+
+procedure TPageBook.PageBackwardQuery(var CanBackward: Boolean);
+begin
+  FrameBookInPage.Reset;
 end;
 
 procedure TPageBook.Initialize;
