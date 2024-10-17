@@ -9,6 +9,7 @@ object FormMain: TFormMain
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  Position = poDesktopCenter
   LCLVersion = '3.6.0.0'
   object Navbar: TToolBar
     Left = 0

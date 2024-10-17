@@ -196,6 +196,41 @@ msgctxt "tformmain.toolbuttonmainmenu.hint"
 msgid "Open main menu"
 msgstr ""
 
+#: tformview.actionresizeany.caption
+msgctxt "tformview.actionresizeany.caption"
+msgid "Fit image to window width or height"
+msgstr ""
+
+#: tformview.actionresizeany.hint
+msgctxt "tformview.actionresizeany.hint"
+msgid "Fit image to window width or height"
+msgstr ""
+
+#: tformview.actionresizeboth.caption
+msgctxt "tformview.actionresizeboth.caption"
+msgid "Fit image to window"
+msgstr ""
+
+#: tformview.actionresizeboth.hint
+msgctxt "tformview.actionresizeboth.hint"
+msgid "Fit image to window"
+msgstr ""
+
+#: tformview.actionresizenone.caption
+msgctxt "tformview.actionresizenone.caption"
+msgid "No fit"
+msgstr ""
+
+#: tformview.actionresizenone.hint
+msgctxt "tformview.actionresizenone.hint"
+msgid "No fit"
+msgstr ""
+
+#: tformview.toolbutton4.caption
+msgctxt "tformview.toolbutton4.caption"
+msgid "ToolButton4"
+msgstr ""
+
 #: tframebook.labelgenre.caption
 msgid "{GENRE}"
 msgstr ""
@@ -446,10 +481,12 @@ msgid "(Empty)"
 msgstr ""
 
 #: tpagebookshelf.toolbutton3.caption
+msgctxt "tpagebookshelf.toolbutton3.caption"
 msgid "ToolButton3"
 msgstr ""
 
 #: tpagebookshelf.toolbutton4.caption
+msgctxt "tpagebookshelf.toolbutton4.caption"
 msgid "ToolButton4"
 msgstr ""
 

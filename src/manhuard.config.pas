@@ -74,7 +74,7 @@ var
     );
     View: (
       SideBySide: False;
-      SizeAdaptation: vsaOneSide;
+      SizeAdaptation: vsaAny;
     );
   );
 

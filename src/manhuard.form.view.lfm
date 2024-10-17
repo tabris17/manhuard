@@ -3,12 +3,15 @@ object FormView: TFormView
   Height = 600
   Top = 162
   Width = 800
+  ActiveControl = ScrollBox
   ClientHeight = 600
   ClientWidth = 800
   Color = clNone
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnResize = FormResize
+  Position = poDesktopCenter
   LCLVersion = '3.6.0.0'
   object ToolBar: TToolBar
     Left = 0
@@ -18,7 +21,37 @@ object FormView: TFormView
     ButtonWidth = 32
     DisabledImages = FormMain.ToolBarIconGrey
     HotImages = FormMain.ToolBarIcon
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 1
+    object ToolButtonResizeNone: TToolButton
+      Left = 1
+      Top = 2
+      Action = ActionResizeNone
+      Grouped = True
+      Style = tbsCheck
+    end
+    object ToolButtonResizeAny: TToolButton
+      Left = 33
+      Top = 2
+      Action = ActionResizeAny
+      Grouped = True
+      Style = tbsCheck
+    end
+    object ToolButtonResizeBoth: TToolButton
+      Left = 65
+      Top = 2
+      Action = ActionResizeBoth
+      Grouped = True
+      Style = tbsCheck
+    end
+    object ToolButton4: TToolButton
+      Left = 97
+      Height = 30
+      Top = 2
+      Caption = 'ToolButton4'
+      Style = tbsDivider
+    end
   end
   object ScrollBox: TScrollBox
     Left = 0
@@ -40,7 +73,6 @@ object FormView: TFormView
     ParentBackground = False
     ParentColor = False
     TabOrder = 0
-    OnResize = ScrollBoxResize
     object ImageView: TImage
       Left = 0
       Height = 100
@@ -89,5 +121,27 @@ object FormView: TFormView
       OnExecute = ActionScrollRightExecute
       ShortCut = 39
     end
+    object ActionResizeNone: TAction
+      Caption = 'No fit'
+      Hint = 'No fit'
+      OnExecute = ActionResizeNoneExecute
+    end
+    object ActionResizeAny: TAction
+      Caption = 'Fit image to window width or height'
+      Hint = 'Fit image to window width or height'
+      OnExecute = ActionResizeAnyExecute
+    end
+    object ActionResizeBoth: TAction
+      Caption = 'Fit image to window'
+      Hint = 'Fit image to window'
+      OnExecute = ActionResizeBothExecute
+    end
+  end
+  object Timer: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = TimerTimer
+    Left = 305
+    Top = 235
   end
 end
