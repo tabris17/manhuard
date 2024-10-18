@@ -1,9 +1,15 @@
 {"version":1,"strings":[
-{"hash":160486420,"name":"tformview.toolbutton4.caption","sourcebytes":[84,111,111,108,66,117,116,116,111,110,52],"value":"ToolButton4"},
+{"hash":258421525,"name":"tformview.actionnextpage.hint","sourcebytes":[78,101,120,116,32,112,97,103,101],"value":"Next page"},
+{"hash":198948837,"name":"tformview.actionpreviouspage.hint","sourcebytes":[80,114,101,118,105,111,117,115,32,112,97,103,101],"value":"Previous page"},
+{"hash":128120149,"name":"tformview.actionnextvolume.hint","sourcebytes":[78,101,120,116,32,118,111,108,117,109,101],"value":"Next volume"},
+{"hash":187040229,"name":"tformview.actionpreviousvolume.hint","sourcebytes":[80,114,101,118,105,111,117,115,32,118,111,108,117,109,101],"value":"Previous volume"},
 {"hash":89222404,"name":"tformview.actionresizenone.caption","sourcebytes":[78,111,32,102,105,116],"value":"No fit"},
 {"hash":89222404,"name":"tformview.actionresizenone.hint","sourcebytes":[78,111,32,102,105,116],"value":"No fit"},
 {"hash":256235780,"name":"tformview.actionresizeany.caption","sourcebytes":[70,105,116,32,105,109,97,103,101,32,116,111,32,119,105,110,100,111,119,32,119,105,100,116,104,32,111,114,32,104,101,105,103,104,116],"value":"Fit image to window width or height"},
 {"hash":256235780,"name":"tformview.actionresizeany.hint","sourcebytes":[70,105,116,32,105,109,97,103,101,32,116,111,32,119,105,110,100,111,119,32,119,105,100,116,104,32,111,114,32,104,101,105,103,104,116],"value":"Fit image to window width or height"},
 {"hash":219103751,"name":"tformview.actionresizeboth.caption","sourcebytes":[70,105,116,32,105,109,97,103,101,32,116,111,32,119,105,110,100,111,119],"value":"Fit image to window"},
-{"hash":219103751,"name":"tformview.actionresizeboth.hint","sourcebytes":[70,105,116,32,105,109,97,103,101,32,116,111,32,119,105,110,100,111,119],"value":"Fit image to window"}
+{"hash":219103751,"name":"tformview.actionresizeboth.hint","sourcebytes":[70,105,116,32,105,109,97,103,101,32,116,111,32,119,105,110,100,111,119],"value":"Fit image to window"},
+{"hash":91609829,"name":"tformview.actiontogglesidebyside.caption","sourcebytes":[84,111,103,103,108,101,32,115,105,100,101,32,98,121,32,115,105,100,101],"value":"Toggle side by side"},
+{"hash":91609829,"name":"tformview.actiontogglesidebyside.hint","sourcebytes":[84,111,103,103,108,101,32,115,105,100,101,32,98,121,32,115,105,100,101],"value":"Toggle side by side"},
+{"hash":88274814,"name":"tformview.actiontogglefullscreen.hint","sourcebytes":[84,111,103,103,108,101,32,102,117,108,108,32,115,99,114,101,101,110],"value":"Toggle full screen"}
 ]}

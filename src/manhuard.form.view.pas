@@ -33,6 +33,8 @@ type
   { TFormView }
 
   TFormView = class(TForm)
+    ActionToggleFullScreen: TAction;
+    ActionToggleSideBySide: TAction;
     ActionResizeBoth: TAction;
     ActionResizeAny: TAction;
     ActionResizeNone: TAction;
@@ -45,15 +47,25 @@ type
     ActionPreviousPage: TAction;
     ActionNextPage: TAction;
     ActionList: TActionList;
-    ImageView: TImage;
+    ImageRight: TImage;
+    ImageLeft: TImage;
     ScrollBox: TScrollBox;
     StatusBar: TStatusBar;
     Timer: TTimer;
     ToolBar: TToolBar;
+    ToolButton1: TToolButton;
+    ToolButtonPreviousVolume: TToolButton;
+    ToolButtonPreviousPage: TToolButton;
+    ToolButtonNextPage: TToolButton;
+    ToolButtonNextVolume: TToolButton;
+    ToolButton7: TToolButton;
+    ToolButtonToggleFullScreen: TToolButton;
+    ToolButtonToggleSideBySide: TToolButton;
     ToolButtonResizeNone: TToolButton;
     ToolButtonResizeAny: TToolButton;
     ToolButtonResizeBoth: TToolButton;
     ToolButton4: TToolButton;
+    procedure ActionToggleFullScreenExecute(Sender: TObject);
     procedure ActionNextPageExecute(Sender: TObject);
     procedure ActionNextVolumeExecute(Sender: TObject);
     procedure ActionPreviousPageExecute(Sender: TObject);
@@ -65,6 +77,7 @@ type
     procedure ActionResizeBothExecute(Sender: TObject);
     procedure ActionResizeAnyExecute(Sender: TObject);
     procedure ActionResizeNoneExecute(Sender: TObject);
+    procedure ActionToggleSideBySideExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -79,11 +92,16 @@ type
     FPages: TMangaBook.TPageArray;
     FVolumeIndex, FPageIndex: Integer;
     FPageCache: TPageCache;
+    FFullScreen: Boolean;
+    FNormalSize: record
+      Width: Integer;
+      Height: Integer;
+    end;
     function GetSelectedPage: TMangaBook.PPage;
     function GetSelectedVolume: TMangaBook.PVolume;
-    procedure RearrangeView;
+    function GetSiblingPage: TMangaBook.PPage;
+    procedure RenderView;
     procedure ViewPage;
-    procedure Display(const Picture: TPicture);
   protected
     procedure LoadSuccess(Sender: TMangaManager.TReadPageWork; Return: TPicture);
     procedure LoadFailure(Sender: TMangaManager.TReadPageWork; Error: TMangaManager.TReadPageWork.TError);
@@ -91,7 +109,8 @@ type
     function Open(Source: TFrameBook): Boolean;
     function GotoNextVolume: Boolean;
     function GotoPreviousVolume: Boolean;
-    property SelectedPage: TMangaBook.PPage read GetSelectedPage; 
+    property SelectedPage: TMangaBook.PPage read GetSelectedPage;
+    property SiblingPage: TMangaBook.PPage read GetSiblingPage;
     property SelectedVolume: TMangaBook.PVolume read GetSelectedVolume;
   end;
 
@@ -159,6 +178,8 @@ end;
 procedure TFormView.FormCreate(Sender: TObject);
 begin
   FSideBySideView := Config.View.SideBySide;
+  ImageRight.Visible := FSideBySideView;
+  ActionToggleSideBySide.Checked := FSideBySideView;
   FSizeAdaptation := Config.View.SizeAdaptation;
   case FSizeAdaptation of
     vsaNone: ToolButtonResizeNone.Down := True;
@@ -166,6 +187,9 @@ begin
     vsaBoth: ToolButtonResizeBoth.Down := True;
   end;
   FPageCache := TPageCache.Create(PAGE_CACHE_SIZE);
+  FNormalSize.Width := Width;
+  FNormalSize.Height := Height;
+  FFullScreen := False;
 end;
 
 procedure TFormView.FormDestroy(Sender: TObject);
@@ -174,7 +198,12 @@ begin
 end;
 
 procedure TFormView.FormResize(Sender: TObject);
-begin
+begin                          
+  if not FFullScreen then
+  begin
+    FNormalSize.Width := Width;
+    FNormalSize.Height := Height;
+  end;
   FLastResized := Now;
   Timer.Enabled := True;
 end;
@@ -183,7 +212,7 @@ procedure TFormView.TimerTimer(Sender: TObject);
 begin
   if MilliSecondsBetween(FLastResized, Now) > 50 then
   begin
-    RearrangeView;
+    RenderView;
     Timer.Enabled := False;
   end;
 end;
@@ -193,6 +222,24 @@ begin
   if FPageIndex >= Length(FPages) - 1 then Exit;
   Inc(FPageIndex);
   ViewPage;
+end;
+
+procedure TFormView.ActionToggleFullScreenExecute(Sender: TObject);
+begin
+  if FFullScreen then
+  begin
+    WindowState := wsNormal;
+    Width := FNormalSize.Width;
+    Height := FNormalSize.Height;
+    BorderStyle := bsSizeable;
+    FFullScreen := False;
+  end
+  else
+  begin
+    FFullScreen := True;
+    BorderStyle := bsNone;
+    WindowState := wsFullScreen;
+  end;
 end;
 
 procedure TFormView.ActionNextVolumeExecute(Sender: TObject);
@@ -252,21 +299,27 @@ procedure TFormView.ActionResizeBothExecute(Sender: TObject);
 begin
   if FSizeAdaptation = vsaBoth then Exit;
   FSizeAdaptation := vsaBoth;
-  RearrangeView;
+  RenderView;
 end;
 
 procedure TFormView.ActionResizeAnyExecute(Sender: TObject);
 begin
   if FSizeAdaptation = vsaAny then Exit;
   FSizeAdaptation := vsaAny;
-  RearrangeView;
+  RenderView;
 end;
 
 procedure TFormView.ActionResizeNoneExecute(Sender: TObject);
 begin
   if FSizeAdaptation = vsaNone then Exit;
   FSizeAdaptation := vsaNone;
-  RearrangeView;
+  RenderView;
+end;
+
+procedure TFormView.ActionToggleSideBySideExecute(Sender: TObject);
+begin
+  FSideBySideView := not FSideBySideView;
+  ImageRight.Visible := FSideBySideView;
 end;
 
 procedure TFormView.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -280,14 +333,15 @@ begin
   FPageCache.Clear;
 end;
 
-procedure TFormView.RearrangeView;
+procedure TFormView.RenderView;
 var
   ImageWidth, ImageHeight, ContainerWidth, ContainerHeight: Integer;
   RawPic: TPicture;
 begin
   if (not FPageCache.Load(SelectedPage, RawPic)) or (RawPic = nil) then Exit;
 
-  ImageView.Picture := RawPic;
+  ImageLeft.Visible := False;
+  ImageLeft.Picture := RawPic;
   ImageWidth := RawPic.Width;
   ImageHeight := RawPic.Height;
   ContainerWidth := ScrollBox.ClientWidth;
@@ -298,11 +352,11 @@ begin
     begin
       if ImageWidth * ScrollBox.Height > ImageHeight * ScrollBox.Width then
       begin
-        ImageView.Picture.Scale(ImageWidth, ContainerHeight);
+        ImageLeft.Picture.Scale(ImageWidth, ContainerHeight);
       end
       else
       begin
-        ImageView.Picture.Scale(ContainerWidth, ImageHeight);
+        ImageLeft.Picture.Scale(ContainerWidth, ImageHeight);
       end;
     end;
     vsaBoth:
@@ -311,15 +365,24 @@ begin
       ContainerWidth := ScrollBox.ClientWidth;
       ContainerHeight := ScrollBox.ClientHeight;
       if (ImageWidth > ContainerWidth) or (ImageHeight > ContainerHeight) then
-        ImageView.Picture.Scale(ContainerWidth, ContainerHeight);
+        ImageLeft.Picture.Scale(ContainerWidth, ContainerHeight);
     end;
   end;
 
-  ImageWidth := ImageView.Picture.Width;
-  ImageHeight := ImageView.Picture.Height;
-  ImageView.Left := specialize IfThen<Integer>(ImageWidth < ContainerWidth, (ContainerWidth - ImageWidth) div 2, 0);
-  ImageView.Top := specialize IfThen<Integer>(ImageHeight < ContainerHeight, (ContainerHeight - ImageHeight) div 2, 0);
+  ImageWidth := ImageLeft.Picture.Width;
+  ImageHeight := ImageLeft.Picture.Height;
+  ImageLeft.Left := specialize IfThen<Integer>(ImageWidth < ContainerWidth, (ContainerWidth - ImageWidth) div 2, 0);
+  ImageLeft.Top := specialize IfThen<Integer>(ImageHeight < ContainerHeight, (ContainerHeight - ImageHeight) div 2, 0);
+  ImageLeft.Visible := True;
   ScrollBox.AutoScroll := True;
+  {if FSideBySideView then
+  begin
+
+  end
+  else
+  begin
+
+  end;}
 end;
 
 function TFormView.GetSelectedPage: TMangaBook.PPage;
@@ -334,12 +397,20 @@ begin
   Result := @FVolumes[FVolumeIndex];
 end;
 
+function TFormView.GetSiblingPage: TMangaBook.PPage;
+var
+  SiblingPageIndex: Integer;
+begin
+  SiblingPageIndex := FPageIndex + 1;
+  if SiblingPageIndex >= Length(FPages) then Exit(nil);
+  Result := @FPages[SiblingPageIndex];
+end;
+
 procedure TFormView.ViewPage;
 var
   TheVolume: TMangaBook.PVolume;
   ThePage: TMangaBook.PPage;
   i, PageCount, VolumeCount: SizeInt;
-  PagePic: TPicture;
 begin
   TheVolume := SelectedVolume;
   ThePage := SelectedPage;
@@ -347,7 +418,8 @@ begin
   PageCount := Length(FPages);
   VolumeCount := Length(FVolumes);
   Caption := Format(FORM_CAPTION, [FBook.Name, TheVolume^.Path, ThePage^.Name]);
-  ImageView.Picture.Clear;
+  ImageLeft.Picture.Clear;
+  ImageRight.Picture.Clear;
   ScrollBox.HorzScrollBar.Position := 0;
   ScrollBox.VertScrollBar.Position := 0;
   ActionPreviousPage.Enabled := FPageIndex > 0;
@@ -355,25 +427,12 @@ begin
   ActionPreviousVolume.Enabled := FVolumeIndex > 0;
   ActionNextVolume.Enabled := FVolumeIndex < VolumeCount - 1;
 
-  if FPageCache.Load(ThePage, PagePic) then
-    Display(PagePic)
-  else
-  begin
-    FPageCache.New(ThePage);
-    MangaManager.ReadPage(FBook, TheVolume, ThePage, @LoadSuccess, @LoadFailure);
-  end;
-
-  for i := FPageIndex + 1 to Min(PageCount - 1, FPageIndex + PRELOAD_COUNT) do
+  for i := FPageIndex to Min(PageCount - 1, FPageIndex + PRELOAD_COUNT) do
   begin
     ThePage := @FPages[i];
     if FPageCache.New(ThePage) then MangaManager.ReadPage(FBook, TheVolume, ThePage, @LoadSuccess, @LoadFailure);
   end;
-end;
-
-procedure TFormView.Display(const Picture: TPicture);
-begin
-  ImageView.Picture := Picture;
-  RearrangeView;
+  RenderView;
 end;
 
 procedure TFormView.LoadSuccess(Sender: TMangaManager.TReadPageWork; Return: TPicture);
@@ -382,8 +441,7 @@ var
 begin
   ReturnPage := (Sender as TMangaPageLoader).Page;
   FPageCache.Save(ReturnPage, Return);
-  if SelectedPage <> ReturnPage then Exit;
-  Display(Return);
+  if FSideBySideView and (SiblingPage <> ReturnPage) or (SelectedPage = ReturnPage) then RenderView;
 end;
 
 procedure TFormView.LoadFailure(Sender: TMangaManager.TReadPageWork; Error: TMangaManager.TReadPageWork.TError);

@@ -196,6 +196,22 @@ msgctxt "tformmain.toolbuttonmainmenu.hint"
 msgid "Open main menu"
 msgstr ""
 
+#: tformview.actionnextpage.hint
+msgid "Next page"
+msgstr ""
+
+#: tformview.actionnextvolume.hint
+msgid "Next volume"
+msgstr ""
+
+#: tformview.actionpreviouspage.hint
+msgid "Previous page"
+msgstr ""
+
+#: tformview.actionpreviousvolume.hint
+msgid "Previous volume"
+msgstr ""
+
 #: tformview.actionresizeany.caption
 msgctxt "tformview.actionresizeany.caption"
 msgid "Fit image to window width or height"
@@ -226,9 +242,18 @@ msgctxt "tformview.actionresizenone.hint"
 msgid "No fit"
 msgstr ""
 
-#: tformview.toolbutton4.caption
-msgctxt "tformview.toolbutton4.caption"
-msgid "ToolButton4"
+#: tformview.actiontogglefullscreen.hint
+msgid "Toggle full screen"
+msgstr ""
+
+#: tformview.actiontogglesidebyside.caption
+msgctxt "tformview.actiontogglesidebyside.caption"
+msgid "Toggle side by side"
+msgstr ""
+
+#: tformview.actiontogglesidebyside.hint
+msgctxt "tformview.actiontogglesidebyside.hint"
+msgid "Toggle side by side"
 msgstr ""
 
 #: tframebook.labelgenre.caption

@@ -1,7 +1,7 @@
 object FormView: TFormView
-  Left = 426
+  Left = 387
   Height = 600
-  Top = 162
+  Top = 141
   Width = 800
   ActiveControl = ScrollBox
   ClientHeight = 600
@@ -24,33 +24,76 @@ object FormView: TFormView
     ParentShowHint = False
     ShowHint = True
     TabOrder = 1
-    object ToolButtonResizeNone: TToolButton
+    object ToolButtonPreviousVolume: TToolButton
       Left = 1
+      Top = 2
+      Action = ActionPreviousVolume
+    end
+    object ToolButtonPreviousPage: TToolButton
+      Left = 33
+      Top = 2
+      Action = ActionPreviousPage
+    end
+    object ToolButtonNextPage: TToolButton
+      Left = 65
+      Top = 2
+      Action = ActionNextPage
+    end
+    object ToolButtonNextVolume: TToolButton
+      Left = 97
+      Top = 2
+      Action = ActionNextVolume
+    end
+    object ToolButton7: TToolButton
+      Left = 129
+      Height = 30
+      Top = 2
+      Style = tbsDivider
+    end
+    object ToolButtonResizeNone: TToolButton
+      Left = 134
       Top = 2
       Action = ActionResizeNone
       Grouped = True
       Style = tbsCheck
     end
     object ToolButtonResizeAny: TToolButton
-      Left = 33
+      Left = 166
       Top = 2
       Action = ActionResizeAny
       Grouped = True
       Style = tbsCheck
     end
     object ToolButtonResizeBoth: TToolButton
-      Left = 65
+      Left = 198
       Top = 2
       Action = ActionResizeBoth
       Grouped = True
       Style = tbsCheck
     end
     object ToolButton4: TToolButton
-      Left = 97
+      Left = 230
       Height = 30
       Top = 2
-      Caption = 'ToolButton4'
       Style = tbsDivider
+    end
+    object ToolButtonToggleSideBySide: TToolButton
+      Left = 235
+      Top = 2
+      Action = ActionToggleSideBySide
+      Style = tbsCheck
+    end
+    object ToolButton1: TToolButton
+      Left = 267
+      Height = 30
+      Top = 2
+      Style = tbsDivider
+    end
+    object ToolButtonToggleFullScreen: TToolButton
+      Left = 272
+      Top = 2
+      Action = ActionToggleFullScreen
+      Style = tbsCheck
     end
   end
   object ScrollBox: TScrollBox
@@ -58,8 +101,8 @@ object FormView: TFormView
     Height = 546
     Top = 32
     Width = 800
-    HorzScrollBar.Increment = 10
-    HorzScrollBar.Page = 100
+    HorzScrollBar.Increment = 20
+    HorzScrollBar.Page = 204
     HorzScrollBar.Smooth = True
     HorzScrollBar.Tracking = True
     VertScrollBar.Increment = 10
@@ -67,18 +110,24 @@ object FormView: TFormView
     VertScrollBar.Smooth = True
     VertScrollBar.Tracking = True
     Align = alClient
-    ClientHeight = 542
-    ClientWidth = 796
+    ClientHeight = 525
+    ClientWidth = 779
     Color = clBackground
     ParentBackground = False
     ParentColor = False
     TabOrder = 0
-    object ImageView: TImage
+    object ImageLeft: TImage
       Left = 0
       Height = 100
       Top = 0
       Width = 100
       AutoSize = True
+    end
+    object ImageRight: TImage
+      Left = 104
+      Height = 100
+      Top = 0
+      Width = 100
     end
   end
   object StatusBar: TStatusBar
@@ -92,17 +141,21 @@ object FormView: TFormView
     Left = 313
     Top = 121
     object ActionNextPage: TAction
+      Hint = 'Next page'
       OnExecute = ActionNextPageExecute
       ShortCut = 34
     end
     object ActionPreviousPage: TAction
+      Hint = 'Previous page'
       OnExecute = ActionPreviousPageExecute
       ShortCut = 33
     end
     object ActionNextVolume: TAction
+      Hint = 'Next volume'
       OnExecute = ActionNextVolumeExecute
     end
     object ActionPreviousVolume: TAction
+      Hint = 'Previous volume'
       OnExecute = ActionPreviousVolumeExecute
     end
     object ActionScrollUp: TAction
@@ -135,6 +188,18 @@ object FormView: TFormView
       Caption = 'Fit image to window'
       Hint = 'Fit image to window'
       OnExecute = ActionResizeBothExecute
+    end
+    object ActionToggleSideBySide: TAction
+      AutoCheck = True
+      Caption = 'Toggle side by side'
+      Hint = 'Toggle side by side'
+      OnExecute = ActionToggleSideBySideExecute
+    end
+    object ActionToggleFullScreen: TAction
+      AutoCheck = True
+      Hint = 'Toggle full screen'
+      OnExecute = ActionToggleFullScreenExecute
+      ShortCut = 122
     end
   end
   object Timer: TTimer
