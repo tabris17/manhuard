@@ -51,7 +51,7 @@ type
     ImageLeft: TImage;
     ScrollBox: TScrollBox;
     StatusBar: TStatusBar;
-    Timer: TTimer;
+    DelayResizer: TTimer;
     ToolBar: TToolBar;
     ToolButton1: TToolButton;
     ToolButtonPreviousVolume: TToolButton;
@@ -82,7 +82,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
-    procedure TimerTimer(Sender: TObject);
+    procedure DelayResizerTimer(Sender: TObject);
   private
     FLastResized: TDateTime;
     FSideBySideView: Boolean;
@@ -101,6 +101,8 @@ type
     function GetSelectedVolume: TMangaBook.PVolume;
     function GetSiblingPage: TMangaBook.PPage;
     procedure RenderView;
+    procedure RenderViewSideBySide;
+    procedure RenderViewSinglePage;
     procedure ViewPage;
   protected
     procedure LoadSuccess(Sender: TMangaManager.TReadPageWork; Return: TPicture);
@@ -205,15 +207,15 @@ begin
     FNormalSize.Height := Height;
   end;
   FLastResized := Now;
-  Timer.Enabled := True;
+  DelayResizer.Enabled := True;
 end;
 
-procedure TFormView.TimerTimer(Sender: TObject);
+procedure TFormView.DelayResizerTimer(Sender: TObject);
 begin
   if MilliSecondsBetween(FLastResized, Now) > 50 then
   begin
     RenderView;
-    Timer.Enabled := False;
+    DelayResizer.Enabled := False;
   end;
 end;
 
@@ -333,58 +335,6 @@ begin
   FPageCache.Clear;
 end;
 
-procedure TFormView.RenderView;
-var
-  ImageWidth, ImageHeight, ContainerWidth, ContainerHeight: Integer;
-  RawPic: TPicture;
-begin
-  if (not FPageCache.Load(SelectedPage, RawPic)) or (RawPic = nil) then Exit;
-
-  ImageLeft.Visible := False;
-  ImageLeft.Picture := RawPic;
-  ImageWidth := RawPic.Width;
-  ImageHeight := RawPic.Height;
-  ContainerWidth := ScrollBox.ClientWidth;
-  ContainerHeight := ScrollBox.ClientHeight;
-
-  case FSizeAdaptation of
-    vsaAny:
-    begin
-      if ImageWidth * ScrollBox.Height > ImageHeight * ScrollBox.Width then
-      begin
-        ImageLeft.Picture.Scale(ImageWidth, ContainerHeight);
-      end
-      else
-      begin
-        ImageLeft.Picture.Scale(ContainerWidth, ImageHeight);
-      end;
-    end;
-    vsaBoth:
-    begin
-      ScrollBox.AutoScroll := False;
-      ContainerWidth := ScrollBox.ClientWidth;
-      ContainerHeight := ScrollBox.ClientHeight;
-      if (ImageWidth > ContainerWidth) or (ImageHeight > ContainerHeight) then
-        ImageLeft.Picture.Scale(ContainerWidth, ContainerHeight);
-    end;
-  end;
-
-  ImageWidth := ImageLeft.Picture.Width;
-  ImageHeight := ImageLeft.Picture.Height;
-  ImageLeft.Left := specialize IfThen<Integer>(ImageWidth < ContainerWidth, (ContainerWidth - ImageWidth) div 2, 0);
-  ImageLeft.Top := specialize IfThen<Integer>(ImageHeight < ContainerHeight, (ContainerHeight - ImageHeight) div 2, 0);
-  ImageLeft.Visible := True;
-  ScrollBox.AutoScroll := True;
-  {if FSideBySideView then
-  begin
-
-  end
-  else
-  begin
-
-  end;}
-end;
-
 function TFormView.GetSelectedPage: TMangaBook.PPage;
 begin
   if (FPageIndex < 0) or (FPageIndex >= Length(FPages)) then Exit(nil);
@@ -404,6 +354,76 @@ begin
   SiblingPageIndex := FPageIndex + 1;
   if SiblingPageIndex >= Length(FPages) then Exit(nil);
   Result := @FPages[SiblingPageIndex];
+end;
+
+procedure TFormView.RenderView;
+begin
+  if FSideBySideView then RenderViewSideBySide else RenderViewSinglePage;
+end;
+
+procedure TFormView.RenderViewSideBySide;
+begin
+
+end;
+
+procedure TFormView.RenderViewSinglePage;
+var
+  ImageWidth, ImageHeight, ContainerWidth, ContainerHeight: Integer;
+  RawPic: TPicture;
+begin
+  if (not FPageCache.Load(SelectedPage, RawPic)) or (RawPic = nil) then Exit;
+
+  ImageLeft.Visible := False;
+  ImageWidth := RawPic.Width;
+  ImageHeight := RawPic.Height;
+  ContainerWidth := ScrollBox.ClientWidth;
+  ContainerHeight := ScrollBox.ClientHeight;
+
+  case FSizeAdaptation of
+    vsaNone: ImageLeft.Picture := RawPic;
+    vsaAny:
+    begin
+      if ImageWidth * ScrollBox.Height > ImageHeight * ScrollBox.Width then
+      begin
+        RawPic.ScaleTo(ImageLeft.Picture, ImageWidth, ContainerHeight);
+      end
+      else
+      begin
+        RawPic.ScaleTo(ImageLeft.Picture, ContainerWidth, ImageHeight);
+      end;
+    end;
+    vsaBoth:
+    begin
+      if (ImageWidth > ContainerWidth) or (ImageHeight > ContainerHeight) then
+        RawPic.ScaleTo(ImageLeft.Picture, ContainerWidth, ContainerHeight)
+      else
+        ImageLeft.Picture := RawPic;
+    end;
+  end;
+
+  ImageWidth := ImageLeft.Picture.Width;
+  ImageHeight := ImageLeft.Picture.Height;
+  if ImageWidth <= ContainerWidth then
+  begin
+    ImageLeft.Left := (ContainerWidth - ImageWidth) div 2;
+    ScrollBox.HorzScrollBar.Visible := False;
+  end
+  else
+  begin
+    ImageLeft.Left := 0;
+    ScrollBox.HorzScrollBar.Visible := True;
+  end;
+  if ImageHeight <= ContainerHeight then
+  begin
+    ImageLeft.Top := (ContainerHeight - ImageHeight) div 2;
+    ScrollBox.VertScrollBar.Visible := False;
+  end
+  else
+  begin
+    ImageLeft.Top := 0;
+    ScrollBox.VertScrollBar.Visible := True;
+  end;
+  ImageLeft.Visible := True;
 end;
 
 procedure TFormView.ViewPage;

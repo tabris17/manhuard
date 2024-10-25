@@ -120,7 +120,7 @@ type
 
   { TMangaManager }
 
-  TMangaManager = class
+  TMangaManager = class(TPersistent)
   type
     TLoadBooksWork = specialize TWork<TMangaBooks>;
     TReadBookWork = specialize TWork<TMangaBook.TCoverDetails>;

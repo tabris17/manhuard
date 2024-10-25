@@ -15,7 +15,7 @@ type
 
   { TListViewIconManager }
 
-  TListViewIconManager = class
+  TListViewIconManager = class(TPersistent)
   type
     TItemData = Pointer;
     THorizontalAlign = (haLeft, haCenter, haRight);

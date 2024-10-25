@@ -5,7 +5,7 @@ unit Manhuard.WorkPool;
 interface
 
 uses
-  Classes, SysUtils, Contnrs, Manhuard.Config, Windows;
+  Classes, SysUtils, Generics.Collections, Manhuard.Config;
 
 const
   MAX_WORKPOOL_CAPACITY = 256;
@@ -16,6 +16,7 @@ type
   EWorkCancel = class(EWork); // throw when State is wsCanceling
   EWorkResetWorker = class(EWork);
   EWorkBusyWorker = class(EWork);
+  EWorkState = class(EWork);
 
   EWorkerPool = class(Exception);
   EInvalidCapacity = class(EWorkerPool);
@@ -49,7 +50,7 @@ type
 
   { TWork }
 
-  generic TWork<T> = class abstract (IWork)
+  generic TWork<T> = class abstract (IWork, IFPObserver)
   type
     TSelf = specialize TWork<T>;
     TError = record
@@ -64,8 +65,14 @@ type
     TOnCancel = procedure (Sender: TSelf) of object;
   private
     FState: TWorkState;
+    procedure SetOnCancel(AValue: TOnCancel);
+    procedure SetOnComplete(AValue: TOnComplete);
+    procedure SetOnFailure(AValue: TOnFailure);
+    procedure SetOnProgress(AValue: TOnProgress);
+    procedure SetOnSuccess(AValue: TOnSuccess);
     procedure SetOwner(TheOwner: TWorker);
     function GetState: TWorkState;
+    procedure FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
   protected
     FWorker: TWorker;
     FOnSuccess: TOnSuccess;
@@ -84,11 +91,12 @@ type
     procedure DoProgress;
   public
     constructor Create;
-    property OnSuccess: TOnSuccess read FOnSuccess write FOnSuccess;
-    property OnFailure: TOnFailure read FOnFailure write FOnFailure;  
-    property OnComplete: TOnComplete read FOnComplete write FOnComplete;
-    property OnProgress: TOnProgress read FOnProgress write FOnProgress;  
-    property OnCancel: TOnCancel read FOnCancel write FOnCancel;
+    destructor Destroy; override;
+    property OnSuccess: TOnSuccess read FOnSuccess write SetOnSuccess;
+    property OnFailure: TOnFailure read FOnFailure write SetOnFailure;
+    property OnComplete: TOnComplete read FOnComplete write SetOnComplete;
+    property OnProgress: TOnProgress read FOnProgress write SetOnProgress;
+    property OnCancel: TOnCancel read FOnCancel write SetOnCancel;
     property Return: T read FReturn;
     property Error: TError read FError;
     property Owner: TWorker read FWorker;
@@ -101,6 +109,8 @@ type
     function Failed: boolean;
     function Cancelled: boolean;
     function Canceling: boolean;
+    function CanCancel: boolean;
+    function CanRun: boolean;
     procedure Cancel;
   end;
 
@@ -126,10 +136,13 @@ type
   { TWorkPool }
 
   TWorkPool = class(TObject)
+  type
+    TWorkerList = specialize TObjectList<TWorker>;
+    TWorkQueue = specialize TQueue<TObject>;
   private
     FCapacity: TWorkPoolCapacity;
-    FWorkQueue: TObjectQueue;
-    FWorkers: TObjectList;
+    FWorkQueue: TWorkQueue;
+    FWorkers: TWorkerList;
     function GetState: TWorkPoolState;
     function GetWorkerCount: Integer;
     function GetIdleWorker: TWorker;
@@ -140,22 +153,41 @@ type
     destructor Destroy; override;
     property Capacity: TWorkPoolCapacity read FCapacity write SetCapacity;
     property WorkerCount: Integer read GetWorkerCount;
-    property WorkQueue: TObjectQueue read FWorkQueue;
+    property WorkQueue: TWorkQueue read FWorkQueue;
     property State: TWorkPoolState read GetState;
     function ReduceWorkers(Count: Integer): Integer;
     procedure Exec(Work: IWork);
   end;
+
+generic procedure SetHandle<T>(var Handle: T; const Value: T; const Observer: TObject); inline;
 
 var
   WorkPool: TWorkPool;
 
 implementation
 
+generic procedure SetHandle<T>(var Handle: T; const Value: T; const Observer: TObject); inline;
+begin
+  if Handle = Value then Exit;
+  if Assigned(Handle) then TPersistent(TMethod(Handle).Data).FPODetachObserver(Observer);
+  if Assigned(Value) then TPersistent(TMethod(Value).Data).FPOAttachObserver(Observer);
+  Handle := Value;
+end;
+
 { TWork }
 
 constructor TWork.Create;
 begin
   FState := wsPending;
+end;
+
+destructor TWork.Destroy;
+begin
+  if Assigned(FOnCancel) then TPersistent(TMethod(FOnCancel).Data).FPODetachObserver(Self);
+  if Assigned(FOnComplete) then TPersistent(TMethod(FOnComplete).Data).FPODetachObserver(Self);
+  if Assigned(FOnFailure) then TPersistent(TMethod(FOnFailure).Data).FPODetachObserver(Self);
+  if Assigned(FOnProgress) then TPersistent(TMethod(FOnProgress).Data).FPODetachObserver(Self);
+  if Assigned(FOnSuccess) then TPersistent(TMethod(FOnSuccess).Data).FPODetachObserver(Self);
 end;
 
 function TWork.Completed: boolean;
@@ -193,6 +225,16 @@ begin
   Result := FState = wsCanceling;
 end;
 
+function TWork.CanCancel: boolean;
+begin
+  Result := (FState = wsRunning) or (FState = wsPending);
+end;
+
+function TWork.CanRun: boolean;
+begin
+  Result := FState = wsPending;
+end;
+
 function TWork.GetObject: TObject;
 begin
   Result := Self;
@@ -205,15 +247,53 @@ begin
   FWorker := TheOwner;
 end;
 
+procedure TWork.SetOnCancel(AValue: TOnCancel);
+begin
+  specialize SetHandle<TOnCancel>(FOnCancel, AValue, Self);
+end;
+
+procedure TWork.SetOnComplete(AValue: TOnComplete);
+begin
+  specialize SetHandle<TOnComplete>(FOnComplete, AValue, Self);
+end;
+
+procedure TWork.SetOnFailure(AValue: TOnFailure);
+begin
+  specialize SetHandle<TOnFailure>(FOnFailure, AValue, Self);
+end;
+
+procedure TWork.SetOnProgress(AValue: TOnProgress);
+begin
+  specialize SetHandle<TOnProgress>(FOnProgress, AValue, Self);
+end;
+
+procedure TWork.SetOnSuccess(AValue: TOnSuccess);
+begin
+  specialize SetHandle<TOnSuccess>(FOnSuccess, AValue, Self);
+end;
+
 function TWork.GetState: TWorkState;
 begin
   Result := FState;
 end;
 
+procedure TWork.FPOObservedChanged(ASender: TObject; Operation: TFPObservedOperation; Data: Pointer);
+begin
+  if Operation <> ooFree then Exit;
+  if Assigned(FOnCancel) and (TMethod(FOnCancel).Data = Pointer(ASender)) then FOnCancel := nil;
+  if Assigned(FOnComplete) and (TMethod(FOnComplete).Data = Pointer(ASender)) then FOnComplete := nil;
+  if Assigned(FOnFailure) and (TMethod(FOnFailure).Data = Pointer(ASender)) then FOnFailure := nil;
+  if Assigned(FOnProgress) and (TMethod(FOnProgress).Data = Pointer(ASender)) then FOnProgress := nil;
+  if Assigned(FOnSuccess) and (TMethod(FOnSuccess).Data = Pointer(ASender)) then FOnSuccess := nil;
+  if (FOnCancel = nil) and (FOnComplete = nil) and (FOnFailure = nil) and (FOnProgress = nil) and (FOnSuccess = nil) then
+    FState := wsCancelled;
+end;
+
 procedure TWork.Run;
 begin
-  FState := wsRunning;
   try
+    if not CanRun then raise EWorkState.Create('The work cannot run');
+    FState := wsRunning;
     FReturn := Execute;
     FState := wsSucceeded;
   except
@@ -265,7 +345,10 @@ begin
   if GetCurrentThreadID = FWorker.ThreadID then
     raise EWorkCancel.Create(EmptyStr)
   else
+  begin
+    if not CanCancel then raise EWorkState.Create('The work cannot cancel');
     FState := wsCanceling;
+  end;
 end;
 
 { TWorker }
@@ -354,19 +437,18 @@ end;
 constructor TWorkPool.Create(ACapacity: TWorkPoolCapacity);
 begin
   FCapacity := ACapacity;
-  FWorkQueue := TObjectQueue.Create;
-  FWorkers := TObjectList.Create;
+  FWorkQueue := TWorkQueue.Create;
+  FWorkers := TWorkerList.Create;
 end;
 
 destructor TWorkPool.Destroy;
 var
-  Item: Pointer;
+  Work: TObject;
+  Worker: TWorker;
 begin
-  for Item in FWorkers do
-  begin
-    with TWorker(Item) do Terminate;
-  end;
+  for Worker in FWorkers do Worker.Terminate;
   FWorkers.Free; // block wait for all worker terminated
+  for Work in FWorkQueue do Work.Free;
   FWorkQueue.Free;
   inherited;
 end;
@@ -408,7 +490,7 @@ end;
 
 procedure TWorkPool.Exec(Work: IWork);
 begin
-  FWorkQueue.Push(Work.GetObject);
+  FWorkQueue.Enqueue(Work.GetObject);
   Trigger;
 end;
 
@@ -420,8 +502,13 @@ begin
   if State = wpsOverload then ReduceWorkers(WorkerCount - FCapacity);
   if FWorkQueue.Count = 0 then Exit;
   Worker := GetIdleWorker;
-  if Assigned(Worker) and Supports(FWorkQueue.Pop, IWork, Work) then
+  if Assigned(Worker) and Supports(FWorkQueue.Dequeue, IWork, Work) then
   begin
+    if Work.State = wsCancelled then
+    begin
+      Trigger;
+      Exit;
+    end;
     Worker.Work := Work;
     Worker.Suspended := False;
   end;

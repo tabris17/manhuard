@@ -5,7 +5,7 @@ unit Manhuard.Helper.Picture;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, ImageMagick;
 
 type
   EPictureError = Exception;
@@ -14,15 +14,16 @@ type
 
   TPictureHelper = class helper for TPicture
   public
-    procedure Resize(Width, Height: Integer);
+    procedure Resize(Width, Height: Integer; const Filter: FilterTypes = LanczosFilter; const Blur: Double = 1.0);
     procedure Scale(Width, Height: Integer; Proportional: Boolean = True);
+    procedure ScaleTo(Dest: TPicture; Width, Height: Integer; Proportional: Boolean = True);
     procedure Load(Stream: TStream);
   end;
 
 
 implementation
 
-uses magick_wand, ImageMagick, IntfGraphics, FPimage, LazUTF8;
+uses magick_wand, IntfGraphics, FPimage, LazUTF8;
 
 procedure ThrowWandException(Wand: PMagickWand);
 var
@@ -76,7 +77,7 @@ end;
 
 { TPictureHelper }
 
-procedure TPictureHelper.Resize(Width, Height: Integer);
+procedure TPictureHelper.Resize(Width, Height: Integer; const Filter: FilterTypes; const Blur: Double);
 var
   Wand: PMagickWand;
   Status: MagickBooleanType;
@@ -85,7 +86,7 @@ begin
   try
     LoadFromPicture(Wand, Self);
     Clear;
-    Status := MagickResizeImage(Wand, Width, Height, LanczosFilter, 1.0);
+    Status := MagickResizeImage(Wand, Width, Height, Filter, Blur);
     if Status = MagickFalse then ThrowWandException(Wand);
     SaveToPicture(Wand, Self);
   finally
@@ -94,11 +95,16 @@ begin
 end;
 
 procedure TPictureHelper.Scale(Width, Height: Integer; Proportional: Boolean);
+begin                           
+  ScaleTo(Self, Width, Height, Proportional);
+end;
+
+procedure TPictureHelper.ScaleTo(Dest: TPicture; Width, Height: Integer; Proportional: Boolean);
 var
   Wand: PMagickWand;
   Status: MagickBooleanType;
   OriginalWidth, OriginalHeight, PropWidth: Integer;
-begin                           
+begin
   OriginalWidth := Self.Width;
   OriginalHeight := Self.Height;
   if (OriginalWidth = 0) or (OriginalHeight = 0) then Exit;
@@ -111,10 +117,10 @@ begin
   Wand := NewMagickWand;
   try
     LoadFromPicture(Wand, Self);
-    Clear;
+    Dest.Clear;
     Status := MagickScaleImage(Wand, Width, Height);
     if Status = MagickFalse then ThrowWandException(Wand);
-    SaveToPicture(Wand, Self);
+    SaveToPicture(Wand, Dest);
   finally
     Wand := DestroyMagickWand(Wand);
   end;

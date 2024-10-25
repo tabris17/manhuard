@@ -522,6 +522,8 @@ begin
   FBusy := False;
   FDetails := Default(TMangaBook.TDetails);
   FVolumeDataDict.Clear;
+  TableOfContents.Items.Clear;
+  PageListView.Items.Clear;
 end;
 
 function TFrameBook.CreateIconManager: TListViewIconManager;

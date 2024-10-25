@@ -110,8 +110,8 @@ object FormView: TFormView
     VertScrollBar.Smooth = True
     VertScrollBar.Tracking = True
     Align = alClient
-    ClientHeight = 525
-    ClientWidth = 779
+    ClientHeight = 542
+    ClientWidth = 796
     Color = clBackground
     ParentBackground = False
     ParentColor = False
@@ -202,10 +202,10 @@ object FormView: TFormView
       ShortCut = 122
     end
   end
-  object Timer: TTimer
+  object DelayResizer: TTimer
     Enabled = False
     Interval = 100
-    OnTimer = TimerTimer
+    OnTimer = DelayResizerTimer
     Left = 305
     Top = 235
   end

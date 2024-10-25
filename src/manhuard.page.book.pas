@@ -14,7 +14,6 @@ type
   TPageBook = class(TFullwidthPage)
     FrameBookInPage: TFrameBook;
   private
-    FBook: TMangaBook;
     procedure SetBook(AValue: TMangaBook);
   protected
     procedure PageBackwardQuery(var CanBackward: Boolean); override;
@@ -32,10 +31,8 @@ implementation
 
 procedure TPageBook.SetBook(AValue: TMangaBook);
 begin
-  if FBook = AValue then Exit;
-  FBook := AValue;
-  LabelTitle.Caption := FBook.Caption;
-  FrameBookInPage.Book := FBook;
+  LabelTitle.Caption := AValue.Caption;
+  FrameBookInPage.Book := AValue;
 end;
 
 procedure TPageBook.PageBackwardQuery(var CanBackward: Boolean);

@@ -5,6 +5,7 @@ object FrameBook: TFrameBook
   Width = 953
   ClientHeight = 647
   ClientWidth = 953
+  LCLVersion = '3.6.0.0'
   OnResize = FrameResize
   TabOrder = 0
   DesignLeft = 416
