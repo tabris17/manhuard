@@ -96,6 +96,7 @@ end;
 destructor TMangaLoader.Destroy;
 begin
   if not Succeeded then FBooks.Free;
+  inherited;
 end;
 
 function TMangaLoader.Execute: TMangaBooks;
